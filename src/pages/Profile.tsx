@@ -1,234 +1,190 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import MainLayout from '@/layouts/MainLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Users, Heart, Edit } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import ContentCard from '@/components/ContentCard';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
-const userProfile = {
-  id: 1,
-  name: 'ரவிக்குமார்',
-  bio: 'எழுத்து என் ஆன்மாவின் மொழி. தமிழ் இலக்கியத்தில் ஆர்வம் கொண்டவர். கவிதைகள் மற்றும் சிறுகதைகள் எழுதுவதில் விருப்பம் கொண்டவர்.',
-  avatar: 'https://xsgames.co/randomusers/assets/avatars/male/1.jpg',
-  followers: 128,
-  following: 45,
-  posts: 36,
-  joined: 'ஜனவரி 2022'
-};
-
-// Sample content data
-const userContent = [
-  {
-    id: 1,
-    type: 'poem',
-    title: 'காலத்தின் கோலம்',
-    excerpt: 'வாழ்வின் சுழற்சியில் காலம் வரையும் கோலங்கள் எத்தனை அழகானவை. நாம் கடந்து செல்லும் பாதையில் விதைக்கப்படும் நினைவுகள் பூக்களாக மலர்கின்றன.',
-    author: 'ரவிக்குமார்',
-    authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/1.jpg',
-    likes: 24,
-    comments: 5,
-    date: '2 days ago',
-    followers: 128
-  },
-  {
-    id: 7,
-    type: 'poem',
-    title: 'காற்றின் இசை',
-    excerpt: 'காற்று தன் இசையை பாடும்போது, இயற்கையின் நடனம் தொடங்குகிறது. மரங்கள் தலையசைக்கின்றன, மலர்கள் புன்னகைக்கின்றன, நாமும் இதயத்தில் இசையை உணர்கிறோம்.',
-    author: 'ரவிக்குமார்',
-    authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/1.jpg',
-    likes: 17,
-    comments: 3,
-    date: '1 week ago',
-    followers: 128
-  },
-  {
-    id: 9,
-    type: 'story',
-    title: 'ஓவியனின் கனவு',
-    excerpt: 'சிறு வயதில் ஓவியம் வரைவதில் ஆர்வம் கொண்ட ராமு, தன் கிராமத்தை விட்டு ஓவிய பயிற்சிக்காக நகரத்துக்கு வந்தான். அவன் சந்தித்த சவால்கள், அவன் கனவை நிஜமாக்கிய கதை.',
-    author: 'ரவிக்குமார்',
-    authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/1.jpg',
-    likes: 31,
-    comments: 7,
-    date: '3 weeks ago',
-    followers: 128
-  }
-];
-
-// Sample follower data
-const followers = [
-  { id: 1, name: 'கமலா', avatar: 'https://xsgames.co/randomusers/assets/avatars/female/4.jpg', works: 48 },
-  { id: 2, name: 'அனிதா', avatar: 'https://xsgames.co/randomusers/assets/avatars/female/2.jpg', works: 24 },
-  { id: 3, name: 'சுரேஷ்', avatar: 'https://xsgames.co/randomusers/assets/avatars/male/3.jpg', works: 18 },
-  { id: 4, name: 'விஜய்', avatar: 'https://xsgames.co/randomusers/assets/avatars/male/5.jpg', works: 15 },
+const data = [
+  { name: 'Jan', uv: 4000, pv: 2400, amt: 2400 },
+  { name: 'Feb', uv: 3000, pv: 1398, amt: 2210 },
+  { name: 'Mar', uv: 2000, pv: 9800, amt: 2290 },
+  { name: 'Apr', uv: 2780, pv: 3908, amt: 2000 },
+  { name: 'May', uv: 1890, pv: 4800, amt: 2181 },
+  { name: 'Jun', uv: 2390, pv: 3800, amt: 2500 },
+  { name: 'Jul', uv: 3490, pv: 4300, amt: 2100 },
+  { name: 'Aug', uv: 4000, pv: 2400, amt: 2400 },
+  { name: 'Sep', uv: 3000, pv: 1398, amt: 2210 },
+  { name: 'Oct', uv: 2000, pv: 9800, amt: 2290 },
+  { name: 'Nov', uv: 2780, pv: 3908, amt: 2000 },
+  { name: 'Dec', uv: 1890, pv: 4800, amt: 2181 },
 ];
 
 const Profile = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("works");
-
-  useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <MainLayout>
-      <div className="container mx-auto pb-20 md:pb-0">
-        <div className="max-w-4xl mx-auto">
-          {/* Profile Header */}
-          <div className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm mb-6">
-            <div className="p-6">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <img 
-                  src={userProfile.avatar} 
-                  alt={userProfile.name} 
-                  className="w-24 h-24 rounded-full border-4 border-white shadow"
-                />
-                <div className="flex-1 text-center md:text-left">
-                  <h1 className="text-2xl font-bold tamil mb-2">{userProfile.name}</h1>
-                  <p className="text-gray-600 mb-4 tamil">{userProfile.bio}</p>
-                  
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold">{userProfile.posts}</div>
-                      <div className="text-xs text-gray-500 tamil">படைப்புகள்</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold">{userProfile.followers}</div>
-                      <div className="text-xs text-gray-500 tamil">பின்தொடர்பவர்கள்</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold">{userProfile.following}</div>
-                      <div className="text-xs text-gray-500 tamil">பின்தொடர்பவைi</div>
-                    </div>
+      <div className="container mx-auto py-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          {/* Left Column - Profile Summary */}
+          <div className="md:col-span-1">
+            <Card className="bg-white shadow-md rounded-lg overflow-hidden">
+              <CardHeader className="flex flex-col items-center">
+                <Avatar className="w-24 h-24 mb-4">
+                  <AvatarImage src="https://xsgames.co/randomusers/assets/avatars/male/78.jpg" />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+                <CardTitle className="text-xl font-semibold">John Doe</CardTitle>
+                <CardDescription className="text-gray-500">Software Engineer</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span>Joined January 1, 2020</span>
                   </div>
-                  
-                  <div className="flex items-center justify-center md:justify-start gap-3">
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Edit size={16} />
-                      <span className="tamil">தொகு</span>
-                    </Button>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">Admin</Badge>
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+              <CardFooter className="flex justify-center">
+                <Button>Edit Profile</Button>
+              </CardFooter>
+            </Card>
           </div>
-          
-          {/* Tabs Content */}
-          <Tabs defaultValue="works" value={activeTab} onValueChange={setActiveTab}>
-            <div className="bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-              <div className="p-4 border-b border-gray-100">
-                <TabsList className="grid grid-cols-2 bg-gray-100">
-                  <TabsTrigger value="works" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-                    <div className="flex items-center gap-2">
-                      <BookOpen size={16} />
-                      <span className="tamil">படைப்புகள்</span>
-                    </div>
-                  </TabsTrigger>
-                  <TabsTrigger value="followers" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-                    <div className="flex items-center gap-2">
-                      <Users size={16} />
-                      <span className="tamil">பின்தொடர்பவர்கள்</span>
-                    </div>
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              
-              <TabsContent value="works" className="m-0 p-4">
-                {isLoading ? (
-                  <div className="space-y-6">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="content-card bg-white h-64 animate-pulse-soft border border-gray-100 shadow-sm">
-                        <div className="p-5 h-full flex flex-col">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
-                            <div>
-                              <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                              <div className="h-3 bg-gray-200 rounded w-16"></div>
-                            </div>
-                          </div>
-                          <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                          <div className="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
-                          <div className="mt-auto flex justify-between">
-                            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                          </div>
-                        </div>
+
+          {/* Right Column - Detailed Information */}
+          <div className="md:col-span-2 space-y-6">
+
+            {/* Overview Section */}
+            <Card className="bg-white shadow-md rounded-lg overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">Overview</CardTitle>
+                <CardDescription>Your account activity this month</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={250}>
+                  <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="uv" stroke="#8884d8" fill="#8884d8" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Account Settings Section */}
+            <Card className="bg-white shadow-md rounded-lg overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">Account Settings</CardTitle>
+                <CardDescription>Manage your account preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>Personal Information</AccordionTrigger>
+                    <AccordionContent>
+                      <div>
+                        <p><strong>Full Name:</strong> John Doe</p>
+                        <p><strong>Email:</strong> john.doe@example.com</p>
+                        <p><strong>Location:</strong> New York, USA</p>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {userContent.map((content) => (
-                      <div key={content.id} className="animate-scale-in">
-                        <ContentCard 
-                          type={content.type}
-                          title={content.title}
-                          excerpt={content.excerpt}
-                          author={content.author}
-                          authorAvatar={content.authorAvatar}
-                          likes={content.likes}
-                          comments={content.comments}
-                          date={content.date}
-                          followers={content.followers}
-                        />
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger>Password</AccordionTrigger>
+                    <AccordionContent>
+                      <div>
+                        <p><strong>Last Changed:</strong> 2 months ago</p>
+                        <Button size="sm">Reset Password</Button>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="followers" className="m-0 p-4">
-                {isLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 animate-pulse">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                          <div>
-                            <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                            <div className="h-3 bg-gray-200 rounded w-16"></div>
-                          </div>
-                        </div>
-                        <div className="w-20 h-8 bg-gray-200 rounded"></div>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger>Notifications</AccordionTrigger>
+                    <AccordionContent>
+                      <div>
+                        <p><strong>Email Notifications:</strong> Enabled</p>
+                        <p><strong>Push Notifications:</strong> Disabled</p>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {followers.map((follower) => (
-                      <div key={follower.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={follower.avatar} 
-                            alt={follower.name} 
-                            className="w-12 h-12 rounded-full border border-gray-200"
-                          />
-                          <div>
-                            <p className="font-medium tamil">{follower.name}</p>
-                            <p className="text-xs text-gray-500 tamil">{follower.works} படைப்புகள்</p>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          <Users size={14} className="mr-1" />
-                          <span className="tamil">பின்தொடர்கிறது</span>
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            </div>
-          </Tabs>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+
+            {/* Usage Section */}
+            <Card className="bg-white shadow-md rounded-lg overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">Usage</CardTitle>
+                <CardDescription>Your recent activity</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableCaption>Recent activities on your account</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Date</TableHead>
+                      <TableHead>Activity</TableHead>
+                      <TableHead>Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>Jan 1, 2024</TableCell>
+                      <TableCell>Content Creation</TableCell>
+                      <TableCell>Created a new poem</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Jan 5, 2024</TableCell>
+                      <TableCell>Comment</TableCell>
+                      <TableCell>Commented on a story</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Jan 10, 2024</TableCell>
+                      <TableCell>Profile Update</TableCell>
+                      <TableCell>Updated profile information</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </MainLayout>

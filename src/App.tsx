@@ -9,6 +9,8 @@ import NotFound from "./pages/NotFound";
 import Leaderboard from "./pages/Leaderboard";
 import Editor from "./pages/Editor";
 import Profile from "./pages/Profile";
+import NoName from "./pages/NoName";
+import WritersSpotlight from "./pages/WritersSpotlight";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,8 @@ const App = () => (
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/editor" element={<Editor />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/noname" element={<NoName />} />
+          <Route path="/spotlight" element={<WritersSpotlight />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

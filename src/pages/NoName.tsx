@@ -1,12 +1,10 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
-import ContentCard from '@/components/ContentCard';
-import { ChevronDown, ChevronUp, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
-// Sample data for demonstration
+// Import sample data from the Index page (in a real app, this would come from an API)
 const sampleContent = [
   {
     id: 1,
@@ -83,21 +81,33 @@ const sampleContent = [
     followers: 64,
     isFollowing: false
   },
+  {
+    id: 6,
+    type: 'opinion',
+    title: 'கலை மற்றும் பண்பாடு',
+    excerpt: 'தமிழ் கலை மற்றும் பண்பாடு உலகின் மிகப் பழமையான மற்றும் செழுமையான பாரம்பரியங்களில் ஒன்றாகும். நாம் அதை போற்றி பாதுகாக்க வேண்டியது நமது கடமை.',
+    content: 'தமிழ் கலை மற்றும் பண்பாடு உலகின் மிகப் பழமையான மற்றும் செழுமையான பாரம்பரியங்களில் ஒன்றாகும். நாம் அதை போற்றி பாதுகாக்க வேண்டியது நமது கடமை. தமிழ் இசை, நடனம், சிற்பம், ஓவியம் போன்ற கலைகள் நம் பண்பாட்டின் அடையாளங்கள். தமிழ் திரைப்படங்கள் மூலம் நம் கலையை உலகறியச் செய்யலாம். தமிழ் பாரம்பரிய உணவுகள், உடைகள், பழக்கவழக்கங்கள் என அனைத்தையும் அடுத்த தலைமுறைக்கு கொண்டு செல்ல வேண்டும். நம் பண்பாட்டை பாதுகாப்பது ஒவ்வொரு தமிழனின் கடமையாகும்.',
+    author: 'மாலதி',
+    authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/6.jpg',
+    likes: 18,
+    dislikes: 3,
+    comments: 4,
+    date: '5 days ago',
+    followers: 43,
+    isFollowing: false
+  }
 ];
 
-const Index = () => {
-  const [isLoading, setIsLoading] = useState(true);
+const NoName = () => {
   const [contents, setContents] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     // Simulate loading data
     const timer = setTimeout(() => {
-      // Filter only content from followed authors
-      const followingContent = sampleContent.filter(item => item.isFollowing);
-      setContents(followingContent);
+      setContents(sampleContent);
       setIsLoading(false);
     }, 1000);
 
@@ -134,11 +144,6 @@ const Index = () => {
     }
   };
 
-  // Navigate to NoName page
-  const handleNoNameClick = () => {
-    navigate('/noname');
-  };
-
   // Set up refs for content elements
   useEffect(() => {
     contentRefs.current = contentRefs.current.slice(0, contents.length);
@@ -147,18 +152,9 @@ const Index = () => {
   return (
     <MainLayout>
       <div className="container mx-auto pb-20 md:pb-0">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold mb-1">Welcome to <span className="tamil">நூலகம்</span></h2>
-            <p className="text-gray-600">Showing content from authors you follow</p>
-          </div>
-          <Button 
-            onClick={handleNoNameClick}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Star className="mr-2 h-4 w-4" />
-            <span className="tamil">NoName</span>
-          </Button>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-1">NoName <span className="tamil">படைப்புகள்</span></h2>
+          <p className="text-gray-600">Discover trending content from all authors</p>
         </div>
 
         {isLoading ? (
@@ -305,4 +301,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default NoName;
