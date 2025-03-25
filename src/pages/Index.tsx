@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import ContentCard from '@/components/ContentCard';
-import { ChevronDown, ChevronUp, Star } from 'lucide-react';
+import { ChevronDown, ChevronUp, MessageSquare, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Sample data for demonstration
@@ -21,7 +20,23 @@ const sampleContent = [
     comments: 5,
     date: '2 days ago',
     followers: 128,
-    isFollowing: true
+    isFollowing: true,
+    commentsList: [
+      {
+        id: 1,
+        author: 'குமார்',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/8.jpg',
+        text: 'இந்த கவிதை மிகவும் அற்புதமாக இருக்கிறது. மீண்டும் படிக்க வேண்டும் என்று தோன்றுகிறது.',
+        date: '1 day ago'
+      },
+      {
+        id: 2,
+        author: 'சரண்யா',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/7.jpg',
+        text: 'உங்கள் வார்த்தைகள் என் மனதை தொட்டன. மிக அழகான கவிதை.',
+        date: '5 hours ago'
+      }
+    ]
   },
   {
     id: 2,
@@ -36,7 +51,23 @@ const sampleContent = [
     comments: 8,
     date: '1 week ago',
     followers: 93,
-    isFollowing: true
+    isFollowing: true,
+    commentsList: [
+      {
+        id: 1,
+        author: 'ரமேஷ்',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/10.jpg',
+        text: 'மழை பற்றிய உங்கள் விவரிப்பு மிகவும் உண்மையானது. நான் கிராமத்தில் இருப்பது போல் உணர்கிறேன்.',
+        date: '2 days ago'
+      },
+      {
+        id: 2, 
+        author: 'பிரியா',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/11.jpg',
+        text: 'இந்த கதை எனக்கு என் சிறுவயதை நினைவூட்டுகிறது. அற்புதமான படைப்பு!',
+        date: 'yesterday'
+      }
+    ]
   },
   {
     id: 3,
@@ -51,7 +82,23 @@ const sampleContent = [
     comments: 15,
     date: '3 days ago',
     followers: 76,
-    isFollowing: false
+    isFollowing: false,
+    commentsList: [
+      {
+        id: 1,
+        author: 'விஜய்',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/12.jpg',
+        text: 'தமிழ் மொழியின் சிறப்பை பற்றி நீங்கள் எழுதியிருப்பது அருமை. நாம் நம் அடுத்த தலைமுறைக்கு இதை கட்டாயம் கொண்டு சேர்க்க வேண்டும்.',
+        date: '2 days ago'
+      },
+      {
+        id: 2,
+        author: 'கார்த்திக்',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/15.jpg',
+        text: 'தமிழ் மொழி காலம் காலமாக வாழும். அதை பாதுகாப்பது நம் கடமை.',
+        date: '1 day ago'
+      }
+    ]
   },
   {
     id: 4,
@@ -66,14 +113,30 @@ const sampleContent = [
     comments: 7,
     date: '4 days ago',
     followers: 215,
-    isFollowing: true
+    isFollowing: true,
+    commentsList: [
+      {
+        id: 1,
+        author: 'சுரேஷ்',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/16.jpg',
+        text: 'நிலவின் நினைவுகள் மிகவும் அற்புதமாக இருக்கிறது. மீண்டும் படிக்க வேண்டும் என்று தோன்றுகிறது.',
+        date: '1 day ago'
+      },
+      {
+        id: 2,
+        author: 'பிரியா',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/17.jpg',
+        text: 'நிலவின் நினைவுகள் என் மனதை தொட்டன. மிக அழகான கவிதை.',
+        date: '3 hours ago'
+      }
+    ]
   },
   {
     id: 5,
     type: 'story',
     title: 'காற்றின் சுவடுகள்',
     excerpt: 'அந்த வீட்டில் வசிக்கும் அனைவரும் ஒரு மர்மத்தை சுமந்து கொண்டிருந்தனர். நான் அங்கு சென்றபோது அந்த மர்மம் கொஞ்சம் கொஞ்சமாக வெளிப்பட ஆரம்பித்தது.',
-    content: 'அந்த வீட்டில் வசிக்கும் அனைவரும் ஒரு மர்மத்தை சுமந்து கொண்டிருந்தனர். நான் அங்கு சென்றபோது அந்த மர்மம் கொஞ்சம் கொஞ்சமாக வெளிப்பட ஆரம்பித்தது. பழைய படிக்கட்டுகள், அறைகளில் உள்ள பழைய புகைப்படங்கள், மூலையில் இருந்த பழைய கடிதங்கள் எல்லாம் ஒரு கதையைச் சொல்லின. அந்த வீட்டின் முந்தைய உரிமையாளர்கள் யார் என்பதைக் கண்டுபிடிக்க நான் தொடங்கினேன். அந்த ஆராய்ச்சியில் கிடைத்த தகவல்கள் என்னை ஆச்சரியப்படுத்தின.',
+    content: 'அந்த வீட்டில் வசிக்கும் அனைவரும் ஒரு மர்மத்தை சுமந்து கொண்டிருந்தனர். நான் அங்கு சென்றபோது அந்த மர்மம் கொஞ்சம் கொஞ்சமாக வெளிப்பட ஆரம்பித்தது. பழைய படிக்கட்டுகள், அறைகளில் உள்ள பழ���ய புகைப்படங்கள், மூலையில் இருந்த பழைய கடிதங்கள் எல்லாம் ஒரு கதையைச் சொல்லின. அந்த வீட்டின் முந்தைய உரிமையாளர்கள் யார் என்பதைக் கண்டுபிடிக்க நான் தொடங்கினேன். அந்த ஆராய்ச்சியில் கிடைத்த தகவல்கள் என்னை ஆச்சரியப்படுத்தின.',
     author: 'விஜய்',
     authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/5.jpg',
     likes: 29,
@@ -81,7 +144,23 @@ const sampleContent = [
     comments: 10,
     date: '1 day ago',
     followers: 64,
-    isFollowing: false
+    isFollowing: false,
+    commentsList: [
+      {
+        id: 1,
+        author: 'சுரேஷ்',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/18.jpg',
+        text: 'காற்றின் சுவடுகள் மிகவும் அற்புதமாக இருக்கிறது. மீண்டும் படிக்க வேண்டும் என்று தோன்றுகிறது.',
+        date: '2 days ago'
+      },
+      {
+        id: 2,
+        author: 'பிரியா',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/19.jpg',
+        text: 'காற்றின் சுவடுகள் என் மனதை தொட்டன. மிக அழகான கவிதை.',
+        date: '3 hours ago'
+      }
+    ]
   },
 ];
 
@@ -89,6 +168,8 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [contents, setContents] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showComments, setShowComments] = useState<number | null>(null);
+  const [newComment, setNewComment] = useState('');
   const navigate = useNavigate();
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -137,6 +218,22 @@ const Index = () => {
   // Navigate to NoName page
   const handleNoNameClick = () => {
     navigate('/noname');
+  };
+
+  // Toggle comments view
+  const toggleComments = (contentId: number) => {
+    setShowComments(showComments === contentId ? null : contentId);
+  };
+
+  // Handle new comment submission
+  const handleAddComment = (contentId: number) => {
+    if (!newComment.trim()) return;
+    
+    // In a real app, this would send the comment to a backend
+    console.log(`Adding comment to content ${contentId}: ${newComment}`);
+    
+    // Reset comment input
+    setNewComment('');
   };
 
   // Set up refs for content elements
@@ -235,7 +332,7 @@ const Index = () => {
                           'bg-amber-100 text-amber-700'
                         }`}>
                           {content.type === 'poem' ? 'கவிதை' : 
-                           content.type === 'story' ? 'சிறுகதை' : 'கருத்து'}
+                           content.type === 'story' ? 'சி��ுகதை' : 'கருத்து'}
                         </span>
                       </div>
                     </div>
@@ -269,10 +366,11 @@ const Index = () => {
                           </button>
 
                           {/* Comment button */}
-                          <button className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
+                          <button 
+                            className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
+                            onClick={() => toggleComments(content.id)}
+                          >
+                            <MessageSquare className="h-6 w-6" />
                             <span>{content.comments}</span>
                           </button>
                         </div>
@@ -294,6 +392,56 @@ const Index = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Comments section */}
+                    {showComments === content.id && (
+                      <div className="p-4 bg-gray-50 border-t max-h-64 overflow-y-auto">
+                        <h4 className="font-medium mb-3">Comments</h4>
+                        
+                        {/* Comment list */}
+                        <div className="space-y-3 mb-4">
+                          {content.commentsList && content.commentsList.map((comment: any) => (
+                            <div key={comment.id} className="flex gap-2">
+                              <img 
+                                src={comment.authorAvatar} 
+                                alt={comment.author} 
+                                className="w-8 h-8 rounded-full"
+                              />
+                              <div className="bg-white p-2 rounded-lg flex-1">
+                                <div className="flex justify-between items-center">
+                                  <p className="text-sm font-medium">{comment.author}</p>
+                                  <span className="text-xs text-gray-500">{comment.date}</span>
+                                </div>
+                                <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Add comment form */}
+                        <div className="flex gap-2 items-center">
+                          <img 
+                            src="https://xsgames.co/randomusers/assets/avatars/male/20.jpg" 
+                            alt="Your avatar" 
+                            className="w-8 h-8 rounded-full"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Add a comment..."
+                            className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddComment(content.id)}
+                          />
+                          <button
+                            className="text-sm bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-colors"
+                            onClick={() => handleAddComment(content.id)}
+                          >
+                            Post
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

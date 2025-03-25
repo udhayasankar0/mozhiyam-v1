@@ -1,10 +1,8 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 
-// Import sample data from the Index page (in a real app, this would come from an API)
 const sampleContent = [
   {
     id: 1,
@@ -19,7 +17,23 @@ const sampleContent = [
     comments: 5,
     date: '2 days ago',
     followers: 128,
-    isFollowing: true
+    isFollowing: true,
+    commentsList: [
+      {
+        id: 1,
+        author: 'குமார்',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/8.jpg',
+        text: 'இந்த கவிதை மிகவும் அற்புதமாக இருக்கிறது. மீண்டும் படிக்க வேண்டும் என்று தோன்றுகிறது.',
+        date: '1 day ago'
+      },
+      {
+        id: 2,
+        author: 'சரண்யா',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/7.jpg',
+        text: 'உங்கள் வார்த்தைகள் என் மனதை தொட்டன. மிக அழகான கவிதை.',
+        date: '5 hours ago'
+      }
+    ]
   },
   {
     id: 2,
@@ -34,7 +48,23 @@ const sampleContent = [
     comments: 8,
     date: '1 week ago',
     followers: 93,
-    isFollowing: true
+    isFollowing: true,
+    commentsList: [
+      {
+        id: 1,
+        author: 'ரமேஷ்',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/10.jpg',
+        text: 'மழை பற்றிய உங்கள் விவரிப்பு மிகவும் உண்மையானது. நான் கிராமத்தில் இருப்பது போல் உணர்கிறேன்.',
+        date: '2 days ago'
+      },
+      {
+        id: 2, 
+        author: 'பிரியா',
+        authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/11.jpg',
+        text: 'இந்த கதை எனக்கு என் சிறுவயதை நினைவூட்டுகிறது. அற்புதமான படைப்பு!',
+        date: 'yesterday'
+      }
+    ]
   },
   {
     id: 3,
@@ -86,7 +116,7 @@ const sampleContent = [
     type: 'opinion',
     title: 'கலை மற்றும் பண்பாடு',
     excerpt: 'தமிழ் கலை மற்றும் பண்பாடு உலகின் மிகப் பழமையான மற்றும் செழுமையான பாரம்பரியங்களில் ஒன்றாகும். நாம் அதை போற்றி பாதுகாக்க வேண்டியது நமது கடமை.',
-    content: 'தமிழ் கலை மற்றும் பண்பாடு உலகின் மிகப் பழமையான மற்றும் செழுமையான பாரம்பரியங்களில் ஒன்றாகும். நாம் அதை போற்றி பாதுகாக்க வேண்டியது நமது கடமை. தமிழ் இசை, நடனம், சிற்பம், ஓவியம் போன்ற கலைகள் நம் பண்பாட்டின் அடையாளங்கள். தமிழ் திரைப்படங்கள் மூலம் நம் கலையை உலகறியச் செய்யலாம். தமிழ் பாரம்பரிய உணவுகள், உடைகள், பழக்கவழக்கங்கள் என அனைத்தையும் அடுத்த தலைமுறைக்கு கொண்டு செல்ல வேண்டும். நம் பண்பாட்டை பாதுகாப்பது ஒவ்வொரு தமிழனின் கடமையாகும்.',
+    content: 'தமிழ் கலை மற்றும் பண்பாடு உலகின் மிகப் பழமையான மற்றும் செழுமையான பாரம்பரியங்களில் ஒன்றாகும். நாம் அதை போற்றி பாதுகாக்க வேண்டியது நமது கடமை. தமிழ் இசை, நடனம், �சிற்பம், ஓவியம் போன்ற கலைகள் நம் பண்பாட்டின் அடையாளங்கள். தமிழ் திரைப்படங்கள் மூலம் நம் கலையை உலகறியச் செய்யலாம். தமிழ் பாரம்பரிய உணவுகள், உடைகள், பழக்கவழக்கங்கள் என அனைத்தையும் அடுத்த தலைமுறைக்கு கொண்டு செல்ல வேண்டும். நம் பண்பாட்டை பாதுகாப்பது ஒவ்வொரு தமிழனின் கடமையாகும்.',
     author: 'மாலதி',
     authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/6.jpg',
     likes: 18,
@@ -102,16 +132,16 @@ const NoName = () => {
   const [contents, setContents] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [showComments, setShowComments] = useState<number | null>(null);
+  const [newComment, setNewComment] = useState('');
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    // Simulate loading data
     const timer = setTimeout(() => {
       setContents(sampleContent);
       setIsLoading(false);
     }, 1000);
 
-    // Add keyboard event listener for arrow navigation
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         nextContent();
@@ -128,7 +158,6 @@ const NoName = () => {
     };
   }, []);
 
-  // Navigate to next content
   const nextContent = () => {
     if (currentIndex < contents.length - 1) {
       setCurrentIndex(prev => prev + 1);
@@ -136,7 +165,6 @@ const NoName = () => {
     }
   };
 
-  // Navigate to previous content
   const prevContent = () => {
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
@@ -144,7 +172,18 @@ const NoName = () => {
     }
   };
 
-  // Set up refs for content elements
+  const toggleComments = (contentId: number) => {
+    setShowComments(showComments === contentId ? null : contentId);
+  };
+
+  const handleAddComment = (contentId: number) => {
+    if (!newComment.trim()) return;
+    
+    console.log(`Adding comment to content ${contentId}: ${newComment}`);
+    
+    setNewComment('');
+  };
+
   useEffect(() => {
     contentRefs.current = contentRefs.current.slice(0, contents.length);
   }, [contents]);
@@ -181,7 +220,6 @@ const NoName = () => {
           </div>
         ) : (
           <div className="relative w-full max-w-[640px] mx-auto">
-            {/* Navigation buttons */}
             {currentIndex > 0 && (
               <button 
                 onClick={prevContent}
@@ -200,7 +238,6 @@ const NoName = () => {
               </button>
             )}
 
-            {/* Content cards in Instagram reel style */}
             <div className="space-y-4 snap-y snap-mandatory overflow-y-auto h-[75vh] scrollbar-hide">
               {contents.map((content, index) => (
                 <div 
@@ -209,7 +246,6 @@ const NoName = () => {
                   className={`snap-start aspect-[4/3] h-[75vh] w-full animate-scale-in bg-white rounded-xl overflow-hidden shadow-md border border-gray-100`}
                 >
                   <div className="h-full flex flex-col">
-                    {/* Author info */}
                     <div className="p-4 border-b flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <img 
@@ -236,7 +272,6 @@ const NoName = () => {
                       </div>
                     </div>
 
-                    {/* Content */}
                     <div className="p-4 flex-grow overflow-y-auto">
                       <h3 className="text-xl font-semibold mb-3 tamil">{content.title}</h3>
                       <p className="text-gray-700 mb-4 tamil whitespace-pre-line">
@@ -244,11 +279,9 @@ const NoName = () => {
                       </p>
                     </div>
 
-                    {/* Action buttons */}
                     <div className="p-4 border-t">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          {/* Like button */}
                           <button className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -256,7 +289,6 @@ const NoName = () => {
                             <span>{content.likes}</span>
                           </button>
 
-                          {/* Dislike button */}
                           <button className="flex items-center gap-1 text-gray-600 hover:text-gray-800 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
@@ -264,24 +296,22 @@ const NoName = () => {
                             <span>{content.dislikes}</span>
                           </button>
 
-                          {/* Comment button */}
-                          <button className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
+                          <button 
+                            className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
+                            onClick={() => toggleComments(content.id)}
+                          >
+                            <MessageSquare className="h-6 w-6" />
                             <span>{content.comments}</span>
                           </button>
                         </div>
 
                         <div className="flex items-center gap-2">
-                          {/* Share button */}
                           <button className="text-gray-600 hover:text-green-500 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                             </svg>
                           </button>
 
-                          {/* Save button */}
                           <button className="text-gray-600 hover:text-blue-500 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -290,6 +320,53 @@ const NoName = () => {
                         </div>
                       </div>
                     </div>
+
+                    {showComments === content.id && (
+                      <div className="p-4 bg-gray-50 border-t max-h-64 overflow-y-auto">
+                        <h4 className="font-medium mb-3">Comments</h4>
+                        
+                        <div className="space-y-3 mb-4">
+                          {content.commentsList && content.commentsList.map((comment: any) => (
+                            <div key={comment.id} className="flex gap-2">
+                              <img 
+                                src={comment.authorAvatar} 
+                                alt={comment.author} 
+                                className="w-8 h-8 rounded-full"
+                              />
+                              <div className="bg-white p-2 rounded-lg flex-1">
+                                <div className="flex justify-between items-center">
+                                  <p className="text-sm font-medium">{comment.author}</p>
+                                  <span className="text-xs text-gray-500">{comment.date}</span>
+                                </div>
+                                <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <div className="flex gap-2 items-center">
+                          <img 
+                            src="https://xsgames.co/randomusers/assets/avatars/male/20.jpg" 
+                            alt="Your avatar" 
+                            className="w-8 h-8 rounded-full"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Add a comment..."
+                            className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddComment(content.id)}
+                          />
+                          <button
+                            className="text-sm bg-green-600 text-white px-4 py-2 rounded-full hover:bg-green-700 transition-colors"
+                            onClick={() => handleAddComment(content.id)}
+                          >
+                            Post
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
