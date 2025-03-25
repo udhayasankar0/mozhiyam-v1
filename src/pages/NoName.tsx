@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
-import { ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 const sampleContent = [
   {
@@ -40,7 +39,7 @@ const sampleContent = [
     type: 'story',
     title: 'மழைத்துளிகள்',
     excerpt: 'அந்த சிறிய கிராமத்தில் பெய்த மழை அனைவரின் வாழ்க்கையையும் மாற்றியது. குளத்தில் நிரம்பிய நீர் விவசாயிகளின் முகத்தில் புன்னகையை வரவழைத்தது.',
-    content: 'அந்த சிறிய கிராமத்தில் பெய்த மழை அனைவரின் வாழ்க்கையையும் மாற்றியது. குளத்தில் நிரம்பிய நீர் விவசாயிகளின் முகத்தில் புன்னகையை வரவழைத்தது. ஏரிக்கரையில் அமர்ந்து அந்த அழகைப் பார்க்கும் குழந்தைகள் கைதட்டி மகிழ்ந்தனர். பசுமை படர்ந்த வயல்களில் பறவைகள் கூட்டம் வந்து அமர்ந்தது. மழைக்குப் பின் வானவில் தோன்றியது போல் அந்த கிராமத்தில் புது வாழ்வு பிறந்தது.',
+    content: 'அந்த சிறிய கிராமத்தில் பெய்த மழை அனைவரின் வாழ்க்கையையும் மாற்றியது. குளத்தில் நிரம்பிய நீர் விவசாயிகளின் முகத்தில் புன்னகையை வரவழைத்தது. ஏரிக்கரையில் அமர்ந்து அந்த அழகைப் பார்க்கும் குழந்தைகள் கைதட்டி மகிழ்ந்தனர். பசுமை படர்ந்த வயல்களில் பறவைகள் கூட்டம் வந்து அமர்ந்தது. மழைக்குப் பின் வானவில் தோன்றியது போல் அந்த கிராமத்தில் பு���ு வாழ்வு பிறந்தது.',
     author: 'அனிதா',
     authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/2.jpg',
     likes: 42,
@@ -130,7 +129,6 @@ const sampleContent = [
 
 const NoName = () => {
   const [contents, setContents] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showComments, setShowComments] = useState<number | null>(null);
   const [newComment, setNewComment] = useState('');
@@ -144,9 +142,18 @@ const NoName = () => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
-        nextContent();
+        const nextItem = document.querySelector('.snap-start:not(.in-view) + .snap-start');
+        if (nextItem) {
+          (nextItem as HTMLElement).scrollIntoView({ behavior: 'smooth' });
+        }
       } else if (e.key === 'ArrowUp') {
-        prevContent();
+        const currentItem = document.querySelector('.snap-start.in-view');
+        if (currentItem) {
+          const prevItem = currentItem.previousElementSibling;
+          if (prevItem && prevItem.classList.contains('snap-start')) {
+            (prevItem as HTMLElement).scrollIntoView({ behavior: 'smooth' });
+          }
+        }
       }
     };
 
@@ -158,19 +165,27 @@ const NoName = () => {
     };
   }, []);
 
-  const nextContent = () => {
-    if (currentIndex < contents.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-      contentRefs.current[currentIndex + 1]?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+          } else {
+            entry.target.classList.remove('in-view');
+          }
+        });
+      },
+      { threshold: 0.7 }
+    );
 
-  const prevContent = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-      contentRefs.current[currentIndex - 1]?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+    const contentItems = document.querySelectorAll('.snap-start');
+    contentItems.forEach((item) => observer.observe(item));
+
+    return () => {
+      contentItems.forEach((item) => observer.unobserve(item));
+    };
+  }, [contents]);
 
   const toggleComments = (contentId: number) => {
     setShowComments(showComments === contentId ? null : contentId);
@@ -199,7 +214,7 @@ const NoName = () => {
         {isLoading ? (
           <div className="space-y-6">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="content-card bg-white h-[75vh] w-full max-w-[640px] mx-auto animate-pulse-soft border border-gray-100 shadow-sm">
+              <div key={i} className="content-card bg-white h-[75vh] w-full max-w-[640px] mx-auto animate-pulse-soft border border-gray-100 shadow-sm rounded-xl">
                 <div className="p-5 h-full flex flex-col">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
@@ -220,24 +235,6 @@ const NoName = () => {
           </div>
         ) : (
           <div className="relative w-full max-w-[640px] mx-auto">
-            {currentIndex > 0 && (
-              <button 
-                onClick={prevContent}
-                className="absolute left-1/2 top-4 transform -translate-x-1/2 z-10 bg-white/70 rounded-full p-2 shadow-md hover:bg-white/90 transition-all"
-              >
-                <ChevronUp className="h-6 w-6 text-gray-700" />
-              </button>
-            )}
-            
-            {currentIndex < contents.length - 1 && (
-              <button 
-                onClick={nextContent}
-                className="absolute left-1/2 bottom-4 transform -translate-x-1/2 z-10 bg-white/70 rounded-full p-2 shadow-md hover:bg-white/90 transition-all"
-              >
-                <ChevronDown className="h-6 w-6 text-gray-700" />
-              </button>
-            )}
-
             <div className="space-y-4 snap-y snap-mandatory overflow-y-auto h-[75vh] scrollbar-hide">
               {contents.map((content, index) => (
                 <div 
@@ -333,7 +330,7 @@ const NoName = () => {
                                 alt={comment.author} 
                                 className="w-8 h-8 rounded-full"
                               />
-                              <div className="bg-white p-2 rounded-lg flex-1">
+                              <div className="bg-white p-2 rounded-lg flex-1 shadow-sm">
                                 <div className="flex justify-between items-center">
                                   <p className="text-sm font-medium">{comment.author}</p>
                                   <span className="text-xs text-gray-500">{comment.date}</span>
