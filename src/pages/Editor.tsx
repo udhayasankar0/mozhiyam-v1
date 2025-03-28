@@ -185,7 +185,7 @@ const Editor = () => {
                 ) : (
                   <Save size={16} />
                 )}
-                <span className="tamil">சேமி</span>
+                <span className="tamil">பதிவிடுக</span>
               </Button>
             </div>
           </div>
