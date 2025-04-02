@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Heart, MessageSquare, Book, BookOpen, MessageSquare as Opinion, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -21,11 +21,14 @@ const ContentCard: React.FC<ContentCardProps> = ({
   excerpt,
   author,
   authorAvatar,
-  likes,
+  likes: initialLikes,
   comments,
   date,
   followers
 }) => {
+  const [liked, setLiked] = useState(false);
+  const [likes, setLikes] = useState(initialLikes);
+
   const getTypeIcon = () => {
     switch (type) {
       case 'poem':
@@ -50,6 +53,15 @@ const ContentCard: React.FC<ContentCardProps> = ({
       default:
         return '';
     }
+  };
+
+  const handleLike = () => {
+    if (liked) {
+      setLikes(likes - 1);
+    } else {
+      setLikes(likes + 1);
+    }
+    setLiked(!liked);
   };
 
   return (
@@ -88,8 +100,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors">
-              <Heart size={16} />
+            <button 
+              className={`flex items-center gap-1 transition-colors ${liked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+              onClick={handleLike}
+            >
+              <Heart size={16} fill={liked ? "currentColor" : "none"} />
               <span className="text-xs">{likes}</span>
             </button>
             <button className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors">

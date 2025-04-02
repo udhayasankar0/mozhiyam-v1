@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import ContentCard from '@/components/ContentCard';
-import { ChevronDown, ChevronUp, MessageSquare, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 // Sample data for demonstration
@@ -136,7 +136,7 @@ const sampleContent = [
     type: 'story',
     title: 'காற்றின் சுவடுகள்',
     excerpt: 'அந்த வீட்டில் வசிக்கும் அனைவரும் ஒரு மர்மத்தை சுமந்து கொண்டிருந்தனர். நான் அங்கு சென்றபோது அந்த மர்மம் கொஞ்சம் கொஞ்சமாக வெளிப்பட ஆரம்பித்தது.',
-    content: 'அந்த வீட்டில் வசிக்கும் அனைவரும் ஒரு மர்மத்தை சுமந்து கொண்டிருந்தனர். நான் அங்கு சென்றபோது அந்த மர்மம் கொஞ்சம் கொஞ்சமாக வெளிப்பட ஆரம்பித்தது. பழைய படிக்கட்டுகள், அறைகளில் உள்ள பழ���ய புகைப்படங்கள், மூலையில் இருந்த பழைய கடிதங்கள் எல்லாம் ஒரு கதையைச் சொல்லின. அந்த வீட்டின் முந்தைய உரிமையாளர்கள் யார் என்பதைக் கண்டுபிடிக்க நான் தொடங்கினேன். அந்த ஆராய்ச்சியில் கிடைத்த தகவல்கள் என்னை ஆச்சரியப்படுத்தின.',
+    content: 'அந்த வீட்டில் வசிக்கும் அனைவரும் ஒரு மர்மத்தை சுமந்து கொண்டிருந்தனர். நான் அங்கு சென்றபோது அந்த மர்மம் கொஞ்சம் கொஞ்சமாக வெளிப்பட ஆரம்பித்தது. பழைய படிக்கட்டுகள், அறைகளில் உள்ள பழய புகைப்படங்கள், மூலையில் இருந்த பழைய கடிதங்கள் எல்லாம் ஒரு கதையைச் சொல்லின. அந்த வீட்டின் முந்தைய உரிமையாளர்கள் யார் என்பதைக் கண்டுபிடிக்க நான் தொடங்கினேன். அந்த ஆராய்ச்சியில் கிடைத்த தகவல்கள் என்னை ஆச்சரியப்படுத்தின.',
     author: 'விஜய்',
     authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/male/5.jpg',
     likes: 29,
@@ -170,6 +170,7 @@ const Index = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showComments, setShowComments] = useState<number | null>(null);
   const [newComment, setNewComment] = useState('');
+  const [comments, setComments] = useState<Record<number, { id: number; author: string; authorAvatar: string; text: string; date: string; }[]>>({});
   const navigate = useNavigate();
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -179,6 +180,14 @@ const Index = () => {
       // Filter only content from followed authors
       const followingContent = sampleContent.filter(item => item.isFollowing);
       setContents(followingContent);
+      
+      // Initialize comments
+      const initialComments: Record<number, any[]> = {};
+      followingContent.forEach(content => {
+        initialComments[content.id] = content.commentsList || [];
+      });
+      setComments(initialComments);
+      
       setIsLoading(false);
     }, 1000);
 
@@ -229,8 +238,19 @@ const Index = () => {
   const handleAddComment = (contentId: number) => {
     if (!newComment.trim()) return;
     
-    // In a real app, this would send the comment to a backend
-    console.log(`Adding comment to content ${contentId}: ${newComment}`);
+    // Add new comment
+    const newCommentObj = {
+      id: Date.now(), // Simple unique ID
+      author: "You", // Current user
+      authorAvatar: "https://xsgames.co/randomusers/assets/avatars/male/20.jpg", // Current user avatar
+      text: newComment,
+      date: "just now"
+    };
+    
+    setComments(prev => ({
+      ...prev,
+      [contentId]: [...(prev[contentId] || []), newCommentObj]
+    }));
     
     // Reset comment input
     setNewComment('');
@@ -282,25 +302,6 @@ const Index = () => {
           </div>
         ) : (
           <div className="relative w-full max-w-[640px] mx-auto">
-            {/* Navigation buttons */}
-            {currentIndex > 0 && (
-              <button 
-                onClick={prevContent}
-                className="absolute left-1/2 top-4 transform -translate-x-1/2 z-10 bg-white/70 rounded-full p-2 shadow-md hover:bg-white/90 transition-all"
-              >
-                <ChevronUp className="h-6 w-6 text-gray-700" />
-              </button>
-            )}
-            
-            {currentIndex < contents.length - 1 && (
-              <button 
-                onClick={nextContent}
-                className="absolute left-1/2 bottom-4 transform -translate-x-1/2 z-10 bg-white/70 rounded-full p-2 shadow-md hover:bg-white/90 transition-all"
-              >
-                <ChevronDown className="h-6 w-6 text-gray-700" />
-              </button>
-            )}
-
             {/* Content cards in Instagram reel style */}
             <div className="space-y-4 snap-y snap-mandatory overflow-y-auto h-[75vh] scrollbar-hide">
               {contents.map((content, index) => (
@@ -332,7 +333,7 @@ const Index = () => {
                           'bg-amber-100 text-amber-700'
                         }`}>
                           {content.type === 'poem' ? 'கவிதை' : 
-                           content.type === 'story' ? 'சி��ுகதை' : 'கருத்து'}
+                           content.type === 'story' ? 'சிறுகதை' : 'கருத்து'}
                         </span>
                       </div>
                     </div>
@@ -350,8 +351,21 @@ const Index = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           {/* Like button */}
-                          <button className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <button className="flex items-center gap-1 group">
+                            <svg 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              className="h-6 w-6 group-hover:text-red-500 transition-colors" 
+                              fill={content.liked ? "currentColor" : "none"} 
+                              viewBox="0 0 24 24" 
+                              stroke="currentColor"
+                              onClick={() => {
+                                const updatedContents = contents.map(c => 
+                                  c.id === content.id ? {...c, liked: !c.liked, likes: c.liked ? c.likes - 1 : c.likes + 1} : c
+                                );
+                                setContents(updatedContents);
+                              }}
+                              className={content.liked ? "text-red-500 fill-red-500" : "text-gray-600"}
+                            >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                             <span>{content.likes}</span>
@@ -370,8 +384,10 @@ const Index = () => {
                             className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors"
                             onClick={() => toggleComments(content.id)}
                           >
-                            <MessageSquare className="h-6 w-6" />
-                            <span>{content.comments}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            <span>{comments[content.id]?.length || 0}</span>
                           </button>
                         </div>
 
@@ -400,7 +416,7 @@ const Index = () => {
                         
                         {/* Comment list */}
                         <div className="space-y-3 mb-4">
-                          {content.commentsList && content.commentsList.map((comment: any) => (
+                          {comments[content.id]?.map((comment) => (
                             <div key={comment.id} className="flex gap-2">
                               <img 
                                 src={comment.authorAvatar} 
@@ -413,6 +429,7 @@ const Index = () => {
                                   <span className="text-xs text-gray-500">{comment.date}</span>
                                 </div>
                                 <p className="text-sm text-gray-700 mt-1">{comment.text}</p>
+                                <button className="text-xs text-gray-500 mt-1 hover:text-green-600">Reply</button>
                               </div>
                             </div>
                           ))}

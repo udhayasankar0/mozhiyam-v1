@@ -26,7 +26,11 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
         <button
           key={category.id}
           onClick={() => onCategoryChange(category.id)}
-          className={`sidebar-item w-full text-left ${activeCategory === category.id ? 'active' : ''}`}
+          className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+            activeCategory === category.id 
+              ? 'bg-green-100 text-green-700' 
+              : 'hover:bg-gray-100'
+          }`}
           aria-current={activeCategory === category.id ? 'page' : undefined}
         >
           <category.icon size={18} />

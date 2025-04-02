@@ -28,13 +28,8 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         </div>
       </div>
 
-      <div className="hidden md:flex items-center gap-6">
-        <nav className="flex items-center gap-4">
-          <a href="#" className="btn-ghost">Home</a>
-          <a href="#" className="btn-ghost">About</a>
-          <a href="#" className="btn-ghost">Contact</a>
-        </nav>
-        <div className="w-64">
+      <div className="hidden md:flex items-center flex-1 mx-6">
+        <div className="w-full max-w-md">
           <SearchBar />
         </div>
       </div>

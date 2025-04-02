@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Book, BookOpen, MessageSquare, List, PenSquare, Award, User, Home, UsersRound, Star } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
 import { Link, useLocation } from 'react-router-dom';
@@ -23,6 +23,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
+    // Here you would typically filter content based on category
+    console.log(`Category changed to: ${categoryId}`);
   };
   
   return (
@@ -33,19 +35,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     >
       <ScrollArea className="h-full py-6 px-3">
         <div className="space-y-1 mb-6">
-          <Link to="/" className={`sidebar-item w-full text-left ${location.pathname === '/' ? 'bg-green-100 text-green-700' : ''}`}>
+          <Link to="/" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
             <Home size={18} />
             <span className="tamil">முகப்பு</span>
           </Link>
-          <Link to="/noname" className={`sidebar-item w-full text-left ${location.pathname === '/noname' ? 'bg-green-100 text-green-700' : ''}`}>
+          <Link to="/noname" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/noname' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
             <Star size={18} />
             <span className="tamil">NoName</span>
           </Link>
-          <Link to="/spotlight" className={`sidebar-item w-full text-left ${location.pathname === '/spotlight' ? 'bg-green-100 text-green-700' : ''}`}>
+          <Link to="/spotlight" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/spotlight' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
             <Award size={18} />
             <span className="tamil">சிறந்த எழுத்தாளர்கள்</span>
           </Link>
-          <Link to="/leaderboard" className={`sidebar-item w-full text-left ${location.pathname === '/leaderboard' ? 'bg-green-100 text-green-700' : ''}`}>
+          <Link to="/leaderboard" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/leaderboard' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
             <UsersRound size={18} />
             <span className="tamil">தரவரிசை</span>
           </Link>
@@ -73,11 +75,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
           <div className="px-3">
             <h3 className="text-sm font-semibold text-gray-700 mb-3">உங்கள் கணக்கு</h3>
             <div className="space-y-2">
-              <Link to="/profile" className={`sidebar-item w-full text-left ${location.pathname === '/profile' ? 'bg-green-100 text-green-700' : ''}`}>
+              <Link to="/profile" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/profile' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
                 <User size={18} />
                 <span className="tamil">சுயவிவரம்</span>
               </Link>
-              <Link to="/followers" className={`sidebar-item w-full text-left ${location.pathname === '/followers' ? 'bg-green-100 text-green-700' : ''}`}>
+              <Link to="/followers" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/followers' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
                 <MessageSquare size={18} />
                 <span className="tamil">பின்தொடர்பவர்கள்</span>
               </Link>
