@@ -1,7 +1,17 @@
 
 import React, { useState } from 'react';
-import { Menu, Search, X } from 'lucide-react';
+import { Menu, Search, X, User, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import SearchBar from './SearchBar';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -9,6 +19,11 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const [searchOpen, setSearchOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = () => {
+    signOut();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full glass-card px-4 py-3 md:py-4 flex items-center justify-between">
@@ -21,10 +36,12 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           <Menu size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-semibold">
-            <span className="tamil">நூலகம்</span>
-            <span className="sr-only">Tamil Library</span>
-          </h1>
+          <Link to="/">
+            <h1 className="text-xl font-semibold">
+              <span className="tamil">நூலகம்</span>
+              <span className="sr-only">Tamil Library</span>
+            </h1>
+          </Link>
         </div>
       </div>
 
@@ -34,26 +51,57 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         </div>
       </div>
 
-      <div className="flex md:hidden items-center gap-2">
-        {searchOpen ? (
-          <div className="absolute inset-x-0 top-0 h-full bg-background px-4 py-3 flex items-center animate-fade-in">
-            <SearchBar />
+      <div className="flex items-center gap-3">
+        <div className="md:hidden">
+          {searchOpen ? (
+            <div className="absolute inset-x-0 top-0 h-full bg-background px-4 py-3 flex items-center animate-fade-in">
+              <SearchBar />
+              <button 
+                onClick={() => setSearchOpen(false)}
+                className="ml-2 p-2"
+                aria-label="Close search"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          ) : (
             <button 
-              onClick={() => setSearchOpen(false)}
-              className="ml-2 p-2"
-              aria-label="Close search"
+              onClick={() => setSearchOpen(true)}
+              className="btn-ghost p-2"
+              aria-label="Search"
             >
-              <X size={20} />
+              <Search size={20} />
             </button>
-          </div>
+          )}
+        </div>
+
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`} />
+                  <AvatarFallback>{user.email?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link to="/profile" className="flex items-center gap-2">
+                  <User size={16} />
+                  <span>Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-red-500">
+                <LogOut size={16} />
+                <span>Sign out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ) : (
-          <button 
-            onClick={() => setSearchOpen(true)}
-            className="btn-ghost p-2"
-            aria-label="Search"
-          >
-            <Search size={20} />
-          </button>
+          <Link to="/auth">
+            <Button variant="outline" size="sm">Sign In</Button>
+          </Link>
         )}
       </div>
     </header>

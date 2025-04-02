@@ -4,6 +4,8 @@ import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import MobileNavbar from '@/components/MobileNavbar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/context/AuthContext';
+import NewPostForm from '@/components/NewPostForm';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -12,6 +14,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
   
   // Close sidebar on mobile when clicking outside
   useEffect(() => {
@@ -37,6 +40,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     setSidebarOpen(!sidebarOpen);
   };
   
+  const refreshContent = () => {
+    // This will be passed to NewPostForm to refresh content after posting
+    window.location.reload();
+  };
+  
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header toggleSidebar={toggleSidebar} />
@@ -45,6 +53,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <Sidebar isOpen={sidebarOpen} />
         </div>
         <main className="flex-1 overflow-y-auto p-4 md:p-6 transition-all duration-300">
+          {user && (
+            <div className="mb-6 flex justify-end">
+              <NewPostForm onPostCreated={refreshContent} />
+            </div>
+          )}
           {children}
         </main>
       </div>
