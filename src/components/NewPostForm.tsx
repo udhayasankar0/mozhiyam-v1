@@ -42,12 +42,14 @@ const NewPostForm = ({ onPostCreated }: { onPostCreated: () => void }) => {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.from('posts').insert({
-        title,
-        content,
-        type,
-        user_id: user.id,
-      });
+      const { error } = await supabase
+        .from('posts')
+        .insert({
+          title,
+          content,
+          type,
+          user_id: user.id,
+        });
 
       if (error) throw error;
 

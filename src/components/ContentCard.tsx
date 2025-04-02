@@ -80,18 +80,28 @@ const ContentCard: React.FC<ContentCardProps> = ({
     try {
       if (liked) {
         // Unlike
-        await supabase.from('likes').delete().match({ user_id: user.id, post_id: id });
+        await supabase
+          .from('likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('post_id', id);
         setLikesCount(likesCount - 1);
         setLiked(false);
       } else {
         // If disliked, remove dislike first
         if (disliked) {
-          await supabase.from('dislikes').delete().match({ user_id: user.id, post_id: id });
+          await supabase
+            .from('dislikes')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('post_id', id);
           setDisliked(false);
         }
         
         // Add like
-        await supabase.from('likes').insert({ user_id: user.id, post_id: id });
+        await supabase
+          .from('likes')
+          .insert({ user_id: user.id, post_id: id });
         setLikesCount(likesCount + 1);
         setLiked(true);
       }
@@ -118,18 +128,28 @@ const ContentCard: React.FC<ContentCardProps> = ({
     try {
       if (disliked) {
         // Remove dislike
-        await supabase.from('dislikes').delete().match({ user_id: user.id, post_id: id });
+        await supabase
+          .from('dislikes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('post_id', id);
         setDisliked(false);
       } else {
         // If liked, remove like first
         if (liked) {
-          await supabase.from('likes').delete().match({ user_id: user.id, post_id: id });
+          await supabase
+            .from('likes')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('post_id', id);
           setLiked(false);
           setLikesCount(likesCount - 1);
         }
         
         // Add dislike
-        await supabase.from('dislikes').insert({ user_id: user.id, post_id: id });
+        await supabase
+          .from('dislikes')
+          .insert({ user_id: user.id, post_id: id });
         setDisliked(true);
       }
     } catch (error: any) {
