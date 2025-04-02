@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 type AuthContextType = {
   user: User | null;
@@ -24,10 +25,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        console.log("Auth state change event:", event);
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
+        
+        // Show toast on email confirmation
+        if (event === 'USER_UPDATED' && session?.user?.email_confirmed_at) {
+          toast({
+            title: 'Email confirmed',
+            description: 'Your email has been confirmed successfully.',
+          });
+        }
       }
     );
 
@@ -41,14 +51,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [toast]);
 
   const signUp = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      // Get current URL as the site URL
+      const siteUrl = window.location.origin;
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${siteUrl}/auth?confirmed=true`,
+        }
       });
 
       if (error) {

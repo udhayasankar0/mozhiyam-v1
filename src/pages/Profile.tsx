@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MainLayout from '@/layouts/MainLayout';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -36,6 +37,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useAuth } from '@/context/AuthContext';
 
 const data = [
   { name: 'Jan', uv: 4000, pv: 2400, amt: 2400 },
@@ -53,6 +55,28 @@ const data = [
 ];
 
 const Profile = () => {
+  const { user } = useAuth();
+  
+  // Format date for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+  
+  const joinedDate = user?.created_at ? formatDate(user.created_at) : 'Recently';
+  const userEmail = user?.email || 'No email';
+  
+  // Get user initials for avatar fallback
+  const getInitials = () => {
+    if (!user?.email) return '??';
+    return user.email.substring(0, 2).toUpperCase();
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto py-10">
@@ -63,20 +87,20 @@ const Profile = () => {
             <Card className="bg-white shadow-md rounded-lg overflow-hidden">
               <CardHeader className="flex flex-col items-center">
                 <Avatar className="w-24 h-24 mb-4">
-                  <AvatarImage src="https://xsgames.co/randomusers/assets/avatars/male/78.jpg" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarImage src="/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png" alt="Profile" />
+                  <AvatarFallback>{getInitials()}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="text-xl font-semibold">John Doe</CardTitle>
-                <CardDescription className="text-gray-500">Software Engineer</CardDescription>
+                <CardTitle className="text-xl font-semibold">{userEmail}</CardTitle>
+                <CardDescription className="text-gray-500">User</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
-                    <span>Joined January 1, 2020</span>
+                    <span>Joined {joinedDate}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">Admin</Badge>
+                    <Badge variant="secondary">User</Badge>
                   </div>
                 </div>
               </CardContent>
@@ -120,9 +144,8 @@ const Profile = () => {
                     <AccordionTrigger>Personal Information</AccordionTrigger>
                     <AccordionContent>
                       <div>
-                        <p><strong>Full Name:</strong> John Doe</p>
-                        <p><strong>Email:</strong> john.doe@example.com</p>
-                        <p><strong>Location:</strong> New York, USA</p>
+                        <p><strong>Email:</strong> {userEmail}</p>
+                        <p><strong>Account Created:</strong> {joinedDate}</p>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -130,7 +153,6 @@ const Profile = () => {
                     <AccordionTrigger>Password</AccordionTrigger>
                     <AccordionContent>
                       <div>
-                        <p><strong>Last Changed:</strong> 2 months ago</p>
                         <Button size="sm">Reset Password</Button>
                       </div>
                     </AccordionContent>
@@ -166,19 +188,9 @@ const Profile = () => {
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell>Jan 1, 2024</TableCell>
-                      <TableCell>Content Creation</TableCell>
-                      <TableCell>Created a new poem</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Jan 5, 2024</TableCell>
-                      <TableCell>Comment</TableCell>
-                      <TableCell>Commented on a story</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Jan 10, 2024</TableCell>
-                      <TableCell>Profile Update</TableCell>
-                      <TableCell>Updated profile information</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>Account Creation</TableCell>
+                      <TableCell>Account created on {joinedDate}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
