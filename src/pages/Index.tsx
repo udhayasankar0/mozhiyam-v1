@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
@@ -354,7 +355,7 @@ const Index = () => {
                           <button className="flex items-center gap-1 group">
                             <svg 
                               xmlns="http://www.w3.org/2000/svg" 
-                              className="h-6 w-6 group-hover:text-red-500 transition-colors" 
+                              className={`h-6 w-6 group-hover:text-red-500 transition-colors ${content.liked ? "text-red-500 fill-red-500" : "text-gray-600"}`}
                               fill={content.liked ? "currentColor" : "none"} 
                               viewBox="0 0 24 24" 
                               stroke="currentColor"
@@ -364,7 +365,6 @@ const Index = () => {
                                 );
                                 setContents(updatedContents);
                               }}
-                              className={content.liked ? "text-red-500 fill-red-500" : "text-gray-600"}
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
