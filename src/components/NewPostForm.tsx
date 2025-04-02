@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import supabase from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -47,7 +47,6 @@ const NewPostForm = ({ onPostCreated }: { onPostCreated: () => void }) => {
         content,
         type,
         user_id: user.id,
-        created_at: new Date().toISOString(),
       });
 
       if (error) throw error;

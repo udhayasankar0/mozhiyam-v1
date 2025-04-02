@@ -25,6 +25,12 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     signOut();
   };
 
+  // Generate initials from email or use default
+  const getInitials = () => {
+    if (!user || !user.email) return '??';
+    return user.email.substring(0, 2).toUpperCase();
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full glass-card px-4 py-3 md:py-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -81,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
               <button className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`} />
-                  <AvatarFallback>{user.email?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>{getInitials()}</AvatarFallback>
                 </Avatar>
               </button>
             </DropdownMenuTrigger>
