@@ -13,6 +13,7 @@ import NoName from "./pages/NoName";
 import WritersSpotlight from "./pages/WritersSpotlight";
 import Auth from "./pages/Auth";
 import ContentDetail from "./pages/ContentDetail";
+import Followers from "./pages/Followers";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const AppRoutes = () => {
       <Route path="/profile/:id" element={<Profile />} />
       <Route path="/noname" element={<NoName />} />
       <Route path="/spotlight" element={<WritersSpotlight />} />
+      <Route path="/followers" element={<ProtectedRoute><Followers /></ProtectedRoute>} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
@@ -52,9 +54,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
+          <Toaster />
+          <Sonner />
           <AppRoutes />
         </BrowserRouter>
       </AuthProvider>

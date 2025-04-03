@@ -14,10 +14,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface HeaderProps {
-  toggleSidebar: () => void;
+  onToggleSidebar: () => void;
+  onRefresh?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onRefresh }) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const { user, signOut } = useAuth();
 
@@ -35,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
     <header className="sticky top-0 z-50 w-full glass-card px-4 py-3 md:py-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <button 
-          onClick={toggleSidebar}
+          onClick={onToggleSidebar}
           className="btn-ghost p-2 md:hidden"
           aria-label="Toggle sidebar"
         >
