@@ -9,9 +9,10 @@ import NewPostForm from '@/components/NewPostForm';
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  onRefresh?: () => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, onRefresh }) => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
@@ -41,8 +42,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   };
   
   const refreshContent = () => {
-    // This will be passed to NewPostForm to refresh content after posting
-    window.location.reload();
+    // Call the parent refresh function if provided
+    if (onRefresh) {
+      onRefresh();
+    }
   };
   
   return (

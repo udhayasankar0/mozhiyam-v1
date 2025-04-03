@@ -1,10 +1,18 @@
 
 import React, { useState } from 'react';
 import { Heart, MessageSquare, Book, BookOpen, MessageSquare as Opinion, UserPlus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from "@/components/ui/textarea";
 
 interface ContentCardProps {
   id: string;
@@ -19,6 +27,16 @@ interface ContentCardProps {
   date: string;
   userLiked: boolean;
   userDisliked: boolean;
+  onUpdate: () => void;
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+  author_name?: string;
+  author_avatar?: string;
 }
 
 const ContentCard: React.FC<ContentCardProps> = ({
@@ -30,16 +48,24 @@ const ContentCard: React.FC<ContentCardProps> = ({
   authorName,
   authorAvatar,
   likes: initialLikes,
-  comments,
+  comments: initialComments,
   date,
   userLiked: initialUserLiked,
-  userDisliked: initialUserDisliked
+  userDisliked: initialUserDisliked,
+  onUpdate
 }) => {
   const [liked, setLiked] = useState(initialUserLiked);
   const [disliked, setDisliked] = useState(initialUserDisliked);
   const [likesCount, setLikesCount] = useState(initialLikes);
+  const [commentsCount, setCommentsCount] = useState(initialComments);
+  const [showComments, setShowComments] = useState(false);
+  const [commentsList, setCommentsList] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [isPostingComment, setIsPostingComment] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const getTypeIcon = () => {
     switch (type) {
@@ -67,13 +93,64 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   };
 
+  const fetchComments = async () => {
+    if (!showComments) return;
+    
+    try {
+      setIsLoadingComments(true);
+      
+      // Fetch comments from the database
+      const { data: commentsData, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('post_id', id)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      if (!commentsData) {
+        setCommentsList([]);
+        return;
+      }
+      
+      // Get author information for each comment
+      const commentsWithAuthor = await Promise.all(
+        commentsData.map(async (comment) => {
+          const { data: authorData } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', comment.user_id)
+            .single();
+            
+          return {
+            ...comment,
+            author_name: authorData?.username || 'Unknown User',
+            author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png', // Default avatar
+          };
+        })
+      );
+      
+      setCommentsList(commentsWithAuthor);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load comments',
+        variant: 'destructive',
+      });
+      console.error('Error fetching comments:', error);
+    } finally {
+      setIsLoadingComments(false);
+    }
+  };
+
+  // Fetch comments when the dialog is opened
+  React.useEffect(() => {
+    fetchComments();
+  }, [showComments]);
+
   const handleLike = async () => {
     if (!user) {
-      toast({
-        title: 'Sign in required',
-        description: 'Please sign in to like posts',
-        variant: 'destructive'
-      });
+      navigate('/auth');
       return;
     }
 
@@ -105,6 +182,9 @@ const ContentCard: React.FC<ContentCardProps> = ({
         setLikesCount(likesCount + 1);
         setLiked(true);
       }
+      
+      // Notify parent to update the data
+      onUpdate();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -117,11 +197,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
 
   const handleDislike = async () => {
     if (!user) {
-      toast({
-        title: 'Sign in required',
-        description: 'Please sign in to dislike posts',
-        variant: 'destructive'
-      });
+      navigate('/auth');
       return;
     }
 
@@ -152,6 +228,9 @@ const ContentCard: React.FC<ContentCardProps> = ({
           .insert({ user_id: user.id, post_id: id });
         setDisliked(true);
       }
+      
+      // Notify parent to update the data
+      onUpdate();
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -162,18 +241,59 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   };
 
-  const handleFollow = () => {
+  const handleCommentSubmit = async () => {
     if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    if (!newComment.trim()) return;
+    
+    try {
+      setIsPostingComment(true);
+      
+      // Add comment to database
+      const { error } = await supabase
+        .from('comments')
+        .insert({
+          content: newComment.trim(),
+          post_id: id,
+          user_id: user.id
+        });
+        
+      if (error) throw error;
+      
+      // Update comment count
+      setCommentsCount(count => count + 1);
+      setNewComment('');
+      
+      // Fetch updated comments list
+      fetchComments();
+      
+      // Notify parent to update data
+      onUpdate();
+      
       toast({
-        title: 'Sign in required',
-        description: 'Please sign in to follow authors',
+        title: 'Success',
+        description: 'Your comment has been posted',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: 'Failed to post comment',
         variant: 'destructive'
       });
+      console.error('Comment error:', error);
+    } finally {
+      setIsPostingComment(false);
+    }
+  };
+
+  const handleShowComments = () => {
+    if (!showComments) {
+      setShowComments(true);
     } else {
-      toast({
-        title: 'Follow feature',
-        description: 'This feature will be implemented soon',
-      });
+      setShowComments(false);
     }
   };
 
@@ -200,7 +320,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
           </div>
         </div>
         
-        <Link to={`/content/${type}/${id}`}>
+        <Link to={`/content/${id}`}>
           <h3 className="text-lg font-semibold mb-2 tamil hover:text-primary transition-colors">{title}</h3>
         </Link>
         <p className="text-sm text-gray-600 mb-4 line-clamp-3 tamil">
@@ -212,6 +332,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
             <button 
               className={`flex items-center gap-1 transition-colors ${liked ? 'text-green-500' : 'text-gray-500 hover:text-green-500'}`}
               onClick={handleLike}
+              aria-label={liked ? "Unlike" : "Like"}
             >
               <Heart size={16} fill={liked ? "currentColor" : "none"} />
               <span className="text-xs">{likesCount}</span>
@@ -219,23 +340,81 @@ const ContentCard: React.FC<ContentCardProps> = ({
             <button 
               className={`flex items-center gap-1 transition-colors ${disliked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
               onClick={handleDislike}
+              aria-label={disliked ? "Remove dislike" : "Dislike"}
             >
               <Heart size={16} fill={disliked ? "currentColor" : "none"} className="rotate-180" />
             </button>
-            <Link to={`/content/${type}/${id}`} className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors">
+            <button
+              className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors"
+              onClick={handleShowComments}
+              aria-label="Show comments"
+            >
               <MessageSquare size={16} />
-              <span className="text-xs">{comments}</span>
-            </Link>
+              <span className="text-xs">{commentsCount}</span>
+            </button>
           </div>
-          <button 
-            className="flex items-center gap-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 py-1 px-3 rounded-full transition-colors"
-            onClick={handleFollow}
-          >
-            <UserPlus size={14} />
-            <span className="tamil">பின்தொடர</span>
-          </button>
         </div>
       </div>
+
+      {/* Comments Dialog */}
+      <Dialog open={showComments} onOpenChange={setShowComments}>
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Comments on "{title}"</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Add comment form */}
+            {user && (
+              <div className="flex flex-col gap-2">
+                <Textarea 
+                  placeholder="Add your comment..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  className="min-h-[80px]"
+                  disabled={isPostingComment}
+                />
+                <Button 
+                  onClick={handleCommentSubmit} 
+                  disabled={!newComment.trim() || isPostingComment}
+                  className="self-end"
+                >
+                  {isPostingComment ? 'Posting...' : 'Post Comment'}
+                </Button>
+              </div>
+            )}
+            
+            {/* Comments list */}
+            <div className="space-y-4 mt-4">
+              {isLoadingComments ? (
+                <div className="py-4 text-center">Loading comments...</div>
+              ) : commentsList.length === 0 ? (
+                <div className="py-4 text-center text-gray-500">No comments yet. Be the first to comment!</div>
+              ) : (
+                commentsList.map((comment) => (
+                  <div key={comment.id} className="border-b pb-4">
+                    <div className="flex items-start gap-3">
+                      <img 
+                        src={comment.author_avatar} 
+                        alt={comment.author_name} 
+                        className="w-8 h-8 rounded-full mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-medium text-sm">{comment.author_name}</span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(comment.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700">{comment.content}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

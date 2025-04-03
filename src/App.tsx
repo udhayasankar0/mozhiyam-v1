@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import NoName from "./pages/NoName";
 import WritersSpotlight from "./pages/WritersSpotlight";
 import Auth from "./pages/Auth";
+import ContentDetail from "./pages/ContentDetail";
 
 const queryClient = new QueryClient();
 
@@ -37,8 +38,10 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
+      <Route path="/content/:id" element={<ContentDetail />} />
       <Route path="/editor" element={<ProtectedRoute><Editor /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/profile/:id" element={<Profile />} />
       <Route path="/noname" element={<NoName />} />
       <Route path="/spotlight" element={<WritersSpotlight />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
