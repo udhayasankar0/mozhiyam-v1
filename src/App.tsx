@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Leaderboard from "./pages/Leaderboard";
 import Editor from "./pages/Editor";
 import Profile from "./pages/Profile";
 import NoName from "./pages/NoName";
@@ -37,7 +36,6 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/leaderboard" element={<Leaderboard />} />
       <Route path="/content/:id" element={<ContentDetail />} />
       <Route path="/editor" element={<ProtectedRoute><Editor /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

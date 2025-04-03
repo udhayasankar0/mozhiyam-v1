@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
@@ -10,14 +9,14 @@ import NewPostForm from '@/components/NewPostForm';
 interface MainLayoutProps {
   children: React.ReactNode;
   onRefresh?: () => void;
+  onCategoryChange?: (categoryId: string) => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, onRefresh }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, onRefresh, onCategoryChange }) => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
   
-  // Close sidebar on mobile when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const sidebar = document.getElementById('sidebar');
@@ -32,7 +31,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, onRefresh }) => {
     };
   }, [isMobile, sidebarOpen]);
   
-  // Update sidebar state when screen size changes
   useEffect(() => {
     setSidebarOpen(false);
   }, [isMobile]);
@@ -42,31 +40,35 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, onRefresh }) => {
   };
   
   const refreshContent = () => {
-    // Call the parent refresh function if provided
     if (onRefresh) {
       onRefresh();
     }
   };
   
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header toggleSidebar={toggleSidebar} />
-      <div className="flex flex-1 overflow-hidden">
-        <div id="sidebar">
-          <Sidebar isOpen={sidebarOpen} />
-        </div>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 transition-all duration-300">
-          {user && (
-            <div className="mb-6 flex justify-end">
-              <NewPostForm onPostCreated={refreshContent} />
-            </div>
-          )}
-          {children}
+    <div className="min-h-screen flex flex-col">
+      <Header 
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={toggleSidebar} 
+        onRefresh={onRefresh}
+      />
+      
+      <div className="flex-1 flex pt-16">
+        <Sidebar isOpen={sidebarOpen} onCategoryChange={onCategoryChange} />
+        
+        <main className="flex-1 bg-gray-50">
+          <div className="py-6">
+            {user && (
+              <div className="mb-6 flex justify-end">
+                <NewPostForm onPostCreated={refreshContent} />
+              </div>
+            )}
+            {children}
+          </div>
         </main>
       </div>
-      <div className="md:hidden">
-        <MobileNavbar />
-      </div>
+      
+      <MobileNavbar />
     </div>
   );
 };

@@ -1,30 +1,35 @@
 
 import React, { useState, useEffect } from 'react';
-import { Book, BookOpen, MessageSquare, List, PenSquare, Award, User, Home, UsersRound, Star } from 'lucide-react';
+import { Book, BookOpen, MessageSquare, List, PenSquare, Award, User, Home, UsersRound } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 
 interface SidebarProps {
   isOpen: boolean;
+  onCategoryChange?: (category: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCategoryChange }) => {
   const [activeCategory, setActiveCategory] = useState('all');
   const location = useLocation();
+  const navigate = useNavigate();
   
   const categories = [
     { id: 'all', name: 'அனைத்தும்', englishName: 'All', icon: List },
-    { id: 'poems', name: 'கவிதைகள்', englishName: 'Poems', icon: Book },
-    { id: 'stories', name: 'சிறுகதைகள்', englishName: 'Short Stories', icon: BookOpen },
-    { id: 'opinions', name: 'கருத்துக்கள்', englishName: 'Opinions', icon: MessageSquare },
+    { id: 'poem', name: 'கவிதைகள்', englishName: 'Poems', icon: Book },
+    { id: 'story', name: 'சிறுகதைகள்', englishName: 'Short Stories', icon: BookOpen },
+    { id: 'opinion', name: 'கருத்துக்கள்', englishName: 'Opinions', icon: MessageSquare },
   ];
   
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
-    // Here you would typically filter content based on category
-    console.log(`Category changed to: ${categoryId}`);
+    
+    // Call the callback if it exists
+    if (onCategoryChange) {
+      onCategoryChange(categoryId);
+    }
   };
   
   return (
@@ -40,16 +45,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             <span className="tamil">முகப்பு</span>
           </Link>
           <Link to="/noname" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/noname' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
-            <Star size={18} />
-            <span className="tamil">NoName</span>
+            <UsersRound size={18} />
+            <span className="tamil">படைப்புகள்</span>
           </Link>
           <Link to="/spotlight" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/spotlight' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
             <Award size={18} />
             <span className="tamil">சிறந்த எழுத்தாளர்கள்</span>
-          </Link>
-          <Link to="/leaderboard" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/leaderboard' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
-            <UsersRound size={18} />
-            <span className="tamil">தரவரிசை</span>
           </Link>
         </div>
         

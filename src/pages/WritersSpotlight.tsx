@@ -4,58 +4,212 @@ import MainLayout from '@/layouts/MainLayout';
 import { Award, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import LeaderboardCard from '@/components/LeaderboardCard';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
-// Top writers data
-const topWriters = [
-  { id: 1, name: 'கமலா', followers: 215, works: 48, avatar: 'https://xsgames.co/randomusers/assets/avatars/female/4.jpg' },
-  { id: 2, name: 'ரவிக்குமார்', followers: 128, works: 36, avatar: 'https://xsgames.co/randomusers/assets/avatars/male/1.jpg' },
-  { id: 3, name: 'அனிதா', followers: 93, works: 24, avatar: 'https://xsgames.co/randomusers/assets/avatars/female/2.jpg' },
-  { id: 4, name: 'சுரேஷ்', followers: 76, works: 18, avatar: 'https://xsgames.co/randomusers/assets/avatars/male/3.jpg' },
-  { id: 5, name: 'விஜய்', followers: 64, works: 15, avatar: 'https://xsgames.co/randomusers/assets/avatars/male/5.jpg' },
-  { id: 6, name: 'மாலதி', followers: 43, works: 9, avatar: 'https://xsgames.co/randomusers/assets/avatars/female/6.jpg' },
-];
+// Interface for content
+interface Content {
+  id: string;
+  type: 'poem' | 'story' | 'opinion';
+  title: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+  author_name?: string;
+  author_avatar?: string;
+  likes: number;
+  comments: number;
+  totalEngagement: number;
+}
 
-// Featured poems and stories
-const featuredContent = {
-  poemOfTheDay: {
-    id: 1,
-    type: 'poem',
-    title: 'நிலவின் நினைவுகள்',
-    excerpt: 'இரவில் ஒளிரும் நிலவு போல் நீ என் வாழ்வில் வந்து சென்றாய். உன் நினைவுகள் மட்டும் என்னுடன் நிலைத்து நிற்கின்றன.',
-    content: 'இரவில் ஒளிரும் நிலவு போல் நீ என் வாழ்வில் வந்து சென்றாய். உன் நினைவுகள் மட்டும் என்னுடன் நிலைத்து நிற்கின்றன. வானில் தெரியும் நட்சத்திரங்கள் போல் உன் கண்கள் என் மனதில் மின்னுகின்றன. நீ இல்லாத வாழ்க்கை இருளாகத் தெரிகிறது. உன் புன்னகை மட்டும் என் நினைவில் சூரியனாக ஒளிர்கிறது. மீண்டும் ஒருமுறை உன்னைச் சந்திக்கும் நாளுக்காக காத்திருக்கிறேன்.',
-    author: 'கமலா',
-    authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/4.jpg',
-    likes: 56,
-    comments: 7,
-    date: '4 days ago',
-    followers: 215,
-  },
-  storyOfTheDay: {
-    id: 2,
-    type: 'story',
-    title: 'மழைத்துளிகள்',
-    excerpt: 'அந்த சிறிய கிராமத்தில் பெய்த மழை அனைவரின் வாழ்க்கையையும் மாற்றியது. குளத்தில் நிரம்பிய நீர் விவசாயிகளின் முகத்தில் புன்னகையை வரவழைத்தது.',
-    content: 'அந்த சிறிய கிராமத்தில் பெய்த மழை அனைவரின் வாழ்க்கையையும் மாற்றியது. குளத்தில் நிரம்பிய நீர் விவசாயிகளின் முகத்தில் புன்னகையை வரவழைத்தது. ஏரிக்கரையில் அமர்ந்து அந்த அழகைப் பார்க்கும் குழந்தைகள் கைதட்டி மகிழ்ந்தனர். பசுமை படர்ந்த வயல்களில் பறவைகள் கூட்டம் வந்து அமர்ந்தது. மழைக்குப் பின் வானவில் தோன்றியது போல் அந்த கிராமத்தில் புது வாழ்வு பிறந்தது.',
-    author: 'அனிதா',
-    authorAvatar: 'https://xsgames.co/randomusers/assets/avatars/female/2.jpg',
-    likes: 42,
-    comments: 8,
-    date: '1 week ago',
-    followers: 93,
-  }
-};
+// Interface for top writers
+interface Writer {
+  id: string;
+  name: string;
+  followers: number;
+  works: number;
+  avatar: string;
+}
 
 const WritersSpotlight = () => {
   const [isLoading, setIsLoading] = useState(true);
-  
+  const [topWriters, setTopWriters] = useState<Writer[]>([]);
+  const [poemOfTheDay, setPoemOfTheDay] = useState<Content | null>(null);
+  const [storyOfTheDay, setStoryOfTheDay] = useState<Content | null>(null);
+  const { toast } = useToast();
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch top writers based on engagement
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, username');
+
+        if (profilesError) throw profilesError;
+
+        if (profiles && profiles.length > 0) {
+          const writersWithStats = await Promise.all(
+            profiles.map(async (profile) => {
+              // Count user's posts
+              const { count: postsCount } = await supabase
+                .from('posts')
+                .select('*', { count: 'exact' })
+                .eq('user_id', profile.id);
+
+              // Get all post IDs for this user
+              const { data: userPosts } = await supabase
+                .from('posts')
+                .select('id')
+                .eq('user_id', profile.id);
+
+              const postIds = userPosts?.map(post => post.id) || [];
+
+              let likesCount = 0;
+
+              if (postIds.length > 0) {
+                // Count likes on user's posts
+                const { count: likes } = await supabase
+                  .from('likes')
+                  .select('*', { count: 'exact' })
+                  .in('post_id', postIds);
+
+                likesCount = likes || 0;
+              }
+
+              return {
+                id: profile.id,
+                name: profile.username || 'Unknown User',
+                followers: likesCount, // Using likes as followers for now
+                works: postsCount || 0,
+                avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png'
+              };
+            })
+          );
+
+          // Sort writers by followers (likes)
+          const sortedWriters = writersWithStats.sort((a, b) => b.followers - a.followers);
+          setTopWriters(sortedWriters.slice(0, 6)); // Top 6 writers
+        }
+
+        // Fetch poem of the day (top poem by engagement)
+        const { data: poems, error: poemsError } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('type', 'poem');
+
+        if (poemsError) throw poemsError;
+
+        if (poems && poems.length > 0) {
+          const poemsWithEngagement = await Promise.all(
+            poems.map(async (poem) => {
+              // Get likes count
+              const { count: likesCount } = await supabase
+                .from('likes')
+                .select('*', { count: 'exact' })
+                .eq('post_id', poem.id);
+
+              // Get comments count
+              const { count: commentsCount } = await supabase
+                .from('comments')
+                .select('*', { count: 'exact' })
+                .eq('post_id', poem.id);
+
+              // Get author info
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', poem.user_id)
+                .single();
+
+              const totalEngagement = (likesCount || 0) + (commentsCount || 0);
+
+              return {
+                ...poem,
+                type: poem.type as 'poem' | 'story' | 'opinion',
+                author_name: profileData?.username || 'Unknown Author',
+                author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png',
+                likes: likesCount || 0,
+                comments: commentsCount || 0,
+                totalEngagement
+              };
+            })
+          );
+
+          // Sort poems by total engagement
+          const sortedPoems = poemsWithEngagement.sort((a, b) => b.totalEngagement - a.totalEngagement);
+          if (sortedPoems.length > 0) {
+            setPoemOfTheDay(sortedPoems[0]);
+          }
+        }
+
+        // Fetch story of the day (top story by engagement)
+        const { data: stories, error: storiesError } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('type', 'story');
+
+        if (storiesError) throw storiesError;
+
+        if (stories && stories.length > 0) {
+          const storiesWithEngagement = await Promise.all(
+            stories.map(async (story) => {
+              // Get likes count
+              const { count: likesCount } = await supabase
+                .from('likes')
+                .select('*', { count: 'exact' })
+                .eq('post_id', story.id);
+
+              // Get comments count
+              const { count: commentsCount } = await supabase
+                .from('comments')
+                .select('*', { count: 'exact' })
+                .eq('post_id', story.id);
+
+              // Get author info
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', story.user_id)
+                .single();
+
+              const totalEngagement = (likesCount || 0) + (commentsCount || 0);
+
+              return {
+                ...story,
+                type: story.type as 'poem' | 'story' | 'opinion',
+                author_name: profileData?.username || 'Unknown Author',
+                author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png',
+                likes: likesCount || 0,
+                comments: commentsCount || 0,
+                totalEngagement
+              };
+            })
+          );
+
+          // Sort stories by total engagement
+          const sortedStories = storiesWithEngagement.sort((a, b) => b.totalEngagement - a.totalEngagement);
+          if (sortedStories.length > 0) {
+            setStoryOfTheDay(sortedStories[0]);
+          }
+        }
+
+      } catch (error: any) {
+        toast({
+          title: 'Error',
+          description: error.message || 'Failed to load spotlight data',
+          variant: 'destructive',
+        });
+        console.error('Error fetching spotlight data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
-  
+
   return (
     <MainLayout>
       <div className="container mx-auto pb-20 md:pb-0">
@@ -70,7 +224,7 @@ const WritersSpotlight = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Leaderboard Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold mb-4 tamil">தரவரிசை</h3>
+            <h3 className="text-lg font-semibold mb-4 tamil">சிறந்த எழுத்தாளர்கள்</h3>
             
             {isLoading ? (
               <div className="space-y-4">
@@ -89,6 +243,10 @@ const WritersSpotlight = () => {
                   </div>
                 ))}
               </div>
+            ) : topWriters.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-gray-500">No writers found yet. Be the first to contribute!</p>
+              </div>
             ) : (
               <div className="space-y-4">
                 {topWriters.map((writer, index) => (
@@ -101,15 +259,6 @@ const WritersSpotlight = () => {
                     avatar={writer.avatar}
                   />
                 ))}
-                
-                <div className="mt-6">
-                  <Link to="/leaderboard" className="text-green-600 text-sm font-medium flex items-center justify-center gap-1 hover:underline">
-                    <span className="tamil">முழு தரவரிசையைப் பார்க்க</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </Link>
-                </div>
               </div>
             )}
           </div>
@@ -138,22 +287,26 @@ const WritersSpotlight = () => {
                     <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                   </div>
                 </div>
+              ) : !poemOfTheDay ? (
+                <div className="text-center py-6">
+                  <p className="text-gray-500">No poems found yet. Be the first to contribute!</p>
+                </div>
               ) : (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <img src={featuredContent.poemOfTheDay.authorAvatar} alt={featuredContent.poemOfTheDay.author} className="w-8 h-8 rounded-full border border-gray-200" />
-                    <span className="text-sm font-medium">{featuredContent.poemOfTheDay.author}</span>
+                    <img src={poemOfTheDay.author_avatar} alt={poemOfTheDay.author_name} className="w-8 h-8 rounded-full border border-gray-200" />
+                    <span className="text-sm font-medium">{poemOfTheDay.author_name}</span>
                   </div>
-                  <h4 className="text-xl font-semibold mb-2 tamil">{featuredContent.poemOfTheDay.title}</h4>
+                  <h4 className="text-xl font-semibold mb-2 tamil">{poemOfTheDay.title}</h4>
                   <p className="text-gray-700 mb-4 tamil line-clamp-4">
-                    {featuredContent.poemOfTheDay.content}
+                    {poemOfTheDay.content}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <span>{featuredContent.poemOfTheDay.likes} likes</span>
-                      <span>{featuredContent.poemOfTheDay.comments} comments</span>
+                      <span>{poemOfTheDay.likes} likes</span>
+                      <span>{poemOfTheDay.comments} comments</span>
                     </div>
-                    <Link to={`/content/poem/${featuredContent.poemOfTheDay.id}`} className="text-green-600 text-sm font-medium hover:underline">
+                    <Link to={`/content/${poemOfTheDay.id}`} className="text-green-600 text-sm font-medium hover:underline">
                       <span className="tamil">முழுவதையும் படிக்க</span>
                     </Link>
                   </div>
@@ -183,22 +336,26 @@ const WritersSpotlight = () => {
                     <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                   </div>
                 </div>
+              ) : !storyOfTheDay ? (
+                <div className="text-center py-6">
+                  <p className="text-gray-500">No stories found yet. Be the first to contribute!</p>
+                </div>
               ) : (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <img src={featuredContent.storyOfTheDay.authorAvatar} alt={featuredContent.storyOfTheDay.author} className="w-8 h-8 rounded-full border border-gray-200" />
-                    <span className="text-sm font-medium">{featuredContent.storyOfTheDay.author}</span>
+                    <img src={storyOfTheDay.author_avatar} alt={storyOfTheDay.author_name} className="w-8 h-8 rounded-full border border-gray-200" />
+                    <span className="text-sm font-medium">{storyOfTheDay.author_name}</span>
                   </div>
-                  <h4 className="text-xl font-semibold mb-2 tamil">{featuredContent.storyOfTheDay.title}</h4>
+                  <h4 className="text-xl font-semibold mb-2 tamil">{storyOfTheDay.title}</h4>
                   <p className="text-gray-700 mb-4 tamil line-clamp-4">
-                    {featuredContent.storyOfTheDay.content}
+                    {storyOfTheDay.content}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <span>{featuredContent.storyOfTheDay.likes} likes</span>
-                      <span>{featuredContent.storyOfTheDay.comments} comments</span>
+                      <span>{storyOfTheDay.likes} likes</span>
+                      <span>{storyOfTheDay.comments} comments</span>
                     </div>
-                    <Link to={`/content/story/${featuredContent.storyOfTheDay.id}`} className="text-green-600 text-sm font-medium hover:underline">
+                    <Link to={`/content/${storyOfTheDay.id}`} className="text-green-600 text-sm font-medium hover:underline">
                       <span className="tamil">முழுவதையும் படிக்க</span>
                     </Link>
                   </div>

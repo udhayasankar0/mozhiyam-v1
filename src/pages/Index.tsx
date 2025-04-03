@@ -1,6 +1,6 @@
 
-import React, { useEffect, useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import ContentCard from '@/components/ContentCard';
 import { Star, Search } from 'lucide-react';
@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 
-// Content type definition - Fixed type property to accept string and cast it correctly
+// Content type definition
 interface Content {
   id: string;
   type: 'poem' | 'story' | 'opinion';
@@ -30,6 +30,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [contents, setContents] = useState<Content[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -40,10 +41,17 @@ const Index = () => {
       setIsLoading(true);
       
       // Get all posts ordered by creation date (newest first)
-      const { data: posts, error } = await supabase
+      let query = supabase
         .from('posts')
         .select('*')
         .order('created_at', { ascending: false });
+      
+      // Apply category filter if not 'all'
+      if (activeCategory !== 'all') {
+        query = query.eq('type', activeCategory);
+      }
+
+      const { data: posts, error } = await query;
 
       if (error) throw error;
 
@@ -128,7 +136,7 @@ const Index = () => {
   // Fetch posts on load and when new post is created
   useEffect(() => {
     fetchPosts();
-  }, [user]);
+  }, [user, activeCategory]);
 
   // Filter posts based on search term
   const filteredContents = searchTerm 
@@ -138,13 +146,18 @@ const Index = () => {
       )
     : contents;
 
-  // Navigate to NoName page
+  // Navigate to படைப்புகள் page
   const handleNoNameClick = () => {
     navigate('/noname');
   };
 
+  // Handle category change from sidebar
+  const handleCategoryChange = (categoryId: string) => {
+    setActiveCategory(categoryId);
+  };
+
   return (
-    <MainLayout onRefresh={fetchPosts}>
+    <MainLayout onRefresh={fetchPosts} onCategoryChange={handleCategoryChange}>
       <div className="container mx-auto pb-20 md:pb-0">
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex justify-between items-center">
@@ -157,7 +170,7 @@ const Index = () => {
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               <Star className="mr-2 h-4 w-4" />
-              <span className="tamil">NoName</span>
+              <span className="tamil">படைப்புகள்</span>
             </Button>
           </div>
           
