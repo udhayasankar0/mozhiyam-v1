@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
@@ -72,7 +71,6 @@ const Profile = () => {
   const [userPosts, setUserPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Format date for display
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Unknown';
     const date = new Date(dateString);
@@ -83,12 +81,10 @@ const Profile = () => {
     });
   };
   
-  // Get profile data
   useEffect(() => {
     const fetchProfileData = async () => {
       setLoading(true);
       try {
-        // If no ID is provided, use the current user's profile
         const profileId = id || user?.id;
         
         if (!profileId) {
@@ -96,7 +92,6 @@ const Profile = () => {
           return;
         }
         
-        // Get profile data
         const { data: profileData, error } = await supabase
           .from('profiles')
           .select('*')
@@ -113,7 +108,6 @@ const Profile = () => {
           created_at: user && profileId === user.id ? user.created_at : profileData.created_at
         });
         
-        // Get user posts
         const { data: posts, error: postsError } = await supabase
           .from('posts')
           .select('*')
@@ -144,7 +138,6 @@ const Profile = () => {
       
   const userEmail = profileUser?.username || (id ? 'User' : user?.email || 'No email');
   
-  // Get user initials for avatar fallback
   const getInitials = () => {
     if (profileUser?.username) return profileUser.username.substring(0, 2).toUpperCase();
     if (!user?.email) return '??';
@@ -158,7 +151,6 @@ const Profile = () => {
       <div className="container mx-auto py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* Left Column - Profile Summary */}
           <div className="md:col-span-1">
             <Card className="bg-white shadow-md rounded-lg overflow-hidden">
               <CardHeader className="flex flex-col items-center">
@@ -198,9 +190,7 @@ const Profile = () => {
             </Card>
           </div>
 
-          {/* Right Column - Detailed Information */}
           <div className="md:col-span-2 space-y-6">
-            {/* Content Tabs */}
             <Tabs defaultValue="posts">
               <TabsList className="grid grid-cols-3">
                 <TabsTrigger value="posts">Posts</TabsTrigger>
@@ -216,7 +206,6 @@ const Profile = () => {
                         key={post.id}
                         id={post.id}
                         title={post.title}
-                        content={post.content}
                         type={post.type}
                         createdAt={post.created_at}
                         authorId={post.user_id}
@@ -254,7 +243,6 @@ const Profile = () => {
 
             {isOwnProfile && (
               <>
-                {/* Overview Section */}
                 <Card className="bg-white shadow-md rounded-lg overflow-hidden">
                   <CardHeader>
                     <CardTitle className="text-lg font-semibold">Overview</CardTitle>
@@ -273,7 +261,6 @@ const Profile = () => {
                   </CardContent>
                 </Card>
 
-                {/* Account Settings Section */}
                 <Card className="bg-white shadow-md rounded-lg overflow-hidden">
                   <CardHeader>
                     <CardTitle className="text-lg font-semibold">Account Settings</CardTitle>
@@ -311,7 +298,6 @@ const Profile = () => {
                   </CardContent>
                 </Card>
 
-                {/* Usage Section */}
                 <Card className="bg-white shadow-md rounded-lg overflow-hidden">
                   <CardHeader>
                     <CardTitle className="text-lg font-semibold">Usage</CardTitle>

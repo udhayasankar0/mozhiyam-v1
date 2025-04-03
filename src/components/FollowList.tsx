@@ -30,10 +30,10 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
         if (type === 'followers') {
           // Get users who follow the specified user
           query = supabase
-            .from('followers')
+            .from('public.followers')
             .select(`
               follower_id,
-              profiles!followers_follower_id_fkey (
+              profiles!inner (
                 id,
                 username
               )
@@ -42,10 +42,10 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
         } else {
           // Get users who are followed by the specified user
           query = supabase
-            .from('followers')
+            .from('public.followers')
             .select(`
               following_id,
-              profiles!followers_following_id_fkey (
+              profiles!inner (
                 id,
                 username
               )
@@ -62,10 +62,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
         
         // Format the user data
         const formattedUsers: FollowUserType[] = data.map((item: any) => {
-          const profile = type === 'followers' 
-            ? item.profiles 
-            : item.profiles;
-            
+          const profile = item.profiles;
           return {
             id: profile.id,
             username: profile.username || 'Anonymous User',
