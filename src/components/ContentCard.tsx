@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
-import { Heart, MessageSquare, Book, BookOpen, MessageSquare as Opinion, UserPlus } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, MessageSquare, Book, BookOpen, MessageSquare as Opinion } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 
 interface ContentCardProps {
   id: string;
@@ -298,63 +300,62 @@ const ContentCard: React.FC<ContentCardProps> = ({
   };
 
   return (
-    <div className="content-card bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md border border-gray-100 shadow-sm">
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-4">
+    <Card className="overflow-hidden shadow-md hover:shadow-lg transition-all duration-300">
+      <CardHeader className="p-4 pb-3">
+        <div className="flex items-center justify-between">
           <Link to={`/profile/${authorId}`} className="flex items-center gap-3">
-            <img 
-              src={authorAvatar} 
-              alt={authorName} 
-              className="w-10 h-10 rounded-full border border-gray-200"
-            />
+            <Avatar>
+              <AvatarImage src={authorAvatar} alt={authorName} />
+              <AvatarFallback>{authorName.charAt(0)}</AvatarFallback>
+            </Avatar>
             <div>
-              <p className="text-sm font-medium">{authorName}</p>
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <span>{date}</span>
-              </div>
+              <p className="font-medium text-sm">{authorName}</p>
+              <p className="text-xs text-gray-500">{date}</p>
             </div>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full">
             {getTypeIcon()}
             <span className="text-xs font-medium tamil">{getTypeLabel()}</span>
           </div>
         </div>
-        
-        <Link to={`/content/${id}`}>
+      </CardHeader>
+      
+      <Link to={`/content/${id}`}>
+        <CardContent className="pt-0 pb-2 px-4">
           <h3 className="text-lg font-semibold mb-2 tamil hover:text-primary transition-colors">{title}</h3>
-        </Link>
-        <p className="text-sm text-gray-600 mb-4 line-clamp-3 tamil">
-          {excerpt}
-        </p>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button 
-              className={`flex items-center gap-1 transition-colors ${liked ? 'text-green-500' : 'text-gray-500 hover:text-green-500'}`}
-              onClick={handleLike}
-              aria-label={liked ? "Unlike" : "Like"}
-            >
-              <Heart size={16} fill={liked ? "currentColor" : "none"} />
-              <span className="text-xs">{likesCount}</span>
-            </button>
-            <button 
-              className={`flex items-center gap-1 transition-colors ${disliked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
-              onClick={handleDislike}
-              aria-label={disliked ? "Remove dislike" : "Dislike"}
-            >
-              <Heart size={16} fill={disliked ? "currentColor" : "none"} className="rotate-180" />
-            </button>
-            <button
-              className="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors"
-              onClick={handleShowComments}
-              aria-label="Show comments"
-            >
-              <MessageSquare size={16} />
-              <span className="text-xs">{commentsCount}</span>
-            </button>
-          </div>
+          <p className="text-sm text-gray-600 mb-1 line-clamp-3 tamil">
+            {excerpt}
+          </p>
+        </CardContent>
+      </Link>
+      
+      <CardFooter className="px-4 py-3 border-t flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button 
+            className={`flex items-center gap-1.5 transition-colors ${liked ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'}`}
+            onClick={handleLike}
+            aria-label={liked ? "Unlike" : "Like"}
+          >
+            <ThumbsUp size={18} className={liked ? "fill-current" : ""} />
+            <span className="text-sm font-medium">{likesCount}</span>
+          </button>
+          <button 
+            className={`flex items-center gap-1.5 transition-colors ${disliked ? 'text-red-600' : 'text-gray-500 hover:text-red-600'}`}
+            onClick={handleDislike}
+            aria-label={disliked ? "Remove dislike" : "Dislike"}
+          >
+            <ThumbsDown size={18} className={disliked ? "fill-current" : ""} />
+          </button>
         </div>
-      </div>
+        <button
+          className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 transition-colors"
+          onClick={handleShowComments}
+          aria-label="Show comments"
+        >
+          <MessageSquare size={18} />
+          <span className="text-sm font-medium">{commentsCount}</span>
+        </button>
+      </CardFooter>
 
       {/* Comments Dialog */}
       <Dialog open={showComments} onOpenChange={setShowComments}>
@@ -393,11 +394,10 @@ const ContentCard: React.FC<ContentCardProps> = ({
                 commentsList.map((comment) => (
                   <div key={comment.id} className="border-b pb-4">
                     <div className="flex items-start gap-3">
-                      <img 
-                        src={comment.author_avatar} 
-                        alt={comment.author_name} 
-                        className="w-8 h-8 rounded-full mt-1"
-                      />
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={comment.author_avatar} alt={comment.author_name} />
+                        <AvatarFallback>{comment.author_name?.charAt(0) || '?'}</AvatarFallback>
+                      </Avatar>
                       <div className="flex-1">
                         <div className="flex justify-between items-center mb-1">
                           <span className="font-medium text-sm">{comment.author_name}</span>
@@ -415,7 +415,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </Card>
   );
 };
 

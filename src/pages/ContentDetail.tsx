@@ -5,16 +5,17 @@ import MainLayout from '@/layouts/MainLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { Avatar } from '@/components/ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, MessageSquare, ArrowLeft } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 
 interface Content {
   id: string;
   title: string;
   content: string;
-  type: string;
+  type: 'poem' | 'story' | 'opinion';
   user_id: string;
   created_at: string;
   author_name?: string;
@@ -104,6 +105,7 @@ const ContentDetail = () => {
         // Set content with author info
         setContent({
           ...post,
+          type: post.type as 'poem' | 'story' | 'opinion',
           author_name: authorData?.username || 'Unknown Author',
           author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png', // Default avatar
         });
@@ -365,65 +367,70 @@ const ContentDetail = () => {
           <span>Back</span>
         </Button>
         
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6">
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12">
-                  <img src={content.author_avatar} alt={content.author_name} />
-                </Avatar>
-                <div>
-                  <p className="font-medium">{content.author_name}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(content.created_at).toLocaleDateString()} • {formatPostType(content.type)}
-                  </p>
-                </div>
+        <Card className="overflow-hidden shadow-md">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={content.author_avatar} alt={content.author_name} />
+                <AvatarFallback>{content.author_name?.charAt(0) || '?'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{content.author_name}</p>
+                <p className="text-sm text-gray-500">
+                  {new Date(content.created_at).toLocaleDateString()} • {formatPostType(content.type)}
+                </p>
               </div>
             </div>
-            
-            <h1 className="text-2xl sm:text-3xl font-bold mb-4 tamil">{content.title}</h1>
-            
-            <div className="prose max-w-none mb-6 tamil">
+            <h1 className="text-2xl sm:text-3xl font-bold mt-4 tamil">{content.title}</h1>
+          </CardHeader>
+          
+          <CardContent className="prose max-w-none">
+            <div className="tamil">
               {content.content.split('\n').map((paragraph, index) => (
                 <p key={index} className="mb-4">{paragraph}</p>
               ))}
             </div>
-            
-            <div className="flex items-center gap-4 border-t pt-4">
+          </CardContent>
+          
+          <CardFooter className="flex items-center justify-between border-t py-4">
+            <div className="flex items-center gap-4">
               <button 
-                className={`flex items-center gap-2 ${isLiked ? 'text-green-500' : 'text-gray-500 hover:text-green-500'}`}
+                className={`flex items-center gap-2 ${isLiked ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'}`}
                 onClick={handleLikeToggle}
               >
-                <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
+                <ThumbsUp size={20} className={isLiked ? "fill-current" : ""} />
                 <span>{likes} {likes === 1 ? 'Like' : 'Likes'}</span>
               </button>
               
               <button 
-                className={`flex items-center gap-2 ${isDisliked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}
+                className={`flex items-center gap-2 ${isDisliked ? 'text-red-600' : 'text-gray-500 hover:text-red-600'}`}
                 onClick={handleDislikeToggle}
               >
-                <Heart size={20} fill={isDisliked ? "currentColor" : "none"} className="rotate-180" />
+                <ThumbsDown size={20} className={isDisliked ? "fill-current" : ""} />
                 <span>Dislike</span>
               </button>
-              
-              <div className="flex items-center gap-2 text-gray-500">
-                <MessageSquare size={20} />
-                <span>{comments.length} {comments.length === 1 ? 'Comment' : 'Comments'}</span>
-              </div>
             </div>
-          </div>
-          
-          {/* Comments section */}
-          <div className="border-t border-gray-100 p-6 bg-gray-50">
-            <h2 className="text-xl font-bold mb-6">Comments</h2>
             
+            <div className="flex items-center gap-2 text-gray-500">
+              <MessageSquare size={20} />
+              <span>{comments.length} {comments.length === 1 ? 'Comment' : 'Comments'}</span>
+            </div>
+          </CardFooter>
+        </Card>
+        
+        {/* Comments section */}
+        <Card className="mt-6">
+          <CardHeader>
+            <h2 className="text-xl font-bold">Comments</h2>
+          </CardHeader>
+          <CardContent className="space-y-6">
             {user && (
-              <div className="mb-6">
+              <div className="space-y-2">
                 <Textarea
                   placeholder="Add a comment..."
                   value={newComment}
                   onChange={e => setNewComment(e.target.value)}
-                  className="mb-2"
+                  className="min-h-[100px]"
                   disabled={isCommentLoading}
                 />
                 <Button 
@@ -442,9 +449,10 @@ const ContentDetail = () => {
             ) : (
               <div className="space-y-6">
                 {comments.map(comment => (
-                  <div key={comment.id} className="flex gap-3">
+                  <div key={comment.id} className="flex gap-3 border-b pb-4">
                     <Avatar className="h-10 w-10">
-                      <img src={comment.author_avatar} alt={comment.author_name} />
+                      <AvatarImage src={comment.author_avatar} alt={comment.author_name} />
+                      <AvatarFallback>{comment.author_name?.charAt(0) || '?'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-1">
@@ -457,8 +465,8 @@ const ContentDetail = () => {
                 ))}
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
