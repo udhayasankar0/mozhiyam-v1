@@ -30,7 +30,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
         if (type === 'followers') {
           // Get users who follow the specified user
           query = supabase
-            .from('public.followers')
+            .from('followers')
             .select(`
               follower_id,
               profiles!inner (
@@ -42,7 +42,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
         } else {
           // Get users who are followed by the specified user
           query = supabase
-            .from('public.followers')
+            .from('followers')
             .select(`
               following_id,
               profiles!inner (

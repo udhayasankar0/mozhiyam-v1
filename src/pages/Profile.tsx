@@ -207,9 +207,9 @@ const Profile = () => {
                         id={post.id}
                         title={post.title}
                         type={post.type}
-                        createdAt={post.created_at}
-                        authorId={post.user_id}
-                        authorName={userEmail}
+                        created_at={post.created_at}
+                        user_id={post.user_id}
+                        author={userEmail}
                       />
                     ))}
                   </div>

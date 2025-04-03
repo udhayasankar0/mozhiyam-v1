@@ -25,7 +25,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     <div className="flex h-screen">
       {/* Sidebar for desktop */}
       <Sidebar 
-        open={sidebarOpen} 
+        isOpen={sidebarOpen} 
         onClose={toggleSidebar} 
         onCategoryChange={onCategoryChange}
       />

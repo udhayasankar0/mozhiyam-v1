@@ -32,7 +32,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       
       try {
         const { data, error } = await supabase
-          .from('public.followers')
+          .from('followers')
           .select('*')
           .eq('follower_id', user.id)
           .eq('following_id', userId)
@@ -52,7 +52,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
     const getFollowerCount = async () => {
       try {
         const { count, error } = await supabase
-          .from('public.followers')
+          .from('followers')
           .select('*', { count: 'exact', head: true })
           .eq('following_id', userId);
         
@@ -99,7 +99,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       if (isFollowing) {
         // Unfollow
         const { error } = await supabase
-          .from('public.followers')
+          .from('followers')
           .delete()
           .eq('follower_id', user.id)
           .eq('following_id', userId);
@@ -115,7 +115,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       } else {
         // Follow
         const { error } = await supabase
-          .from('public.followers')
+          .from('followers')
           .insert({
             follower_id: user.id,
             following_id: userId,
