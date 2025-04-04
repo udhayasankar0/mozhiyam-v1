@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-// Create an empty component since we're removing the footer as requested
+// Component completely removed as requested
 const MobileNavbar: React.FC = () => {
   return null;
 };

@@ -81,7 +81,8 @@ const Editor = () => {
       });
 
       // Navigate to the home page after successful posting
-      navigate('/');
+      // Using a different key to trigger a refresh
+      navigate('/', { replace: true, state: { refresh: true } });
     } catch (error) {
       console.error('Error creating post:', error);
       setIsSaving(false);

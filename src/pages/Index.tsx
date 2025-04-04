@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
@@ -194,7 +195,7 @@ const Index = () => {
         {isLoading ? (
           <div className="space-y-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="content-card bg-white rounded-xl overflow-hidden shadow-md animate-pulse-soft border border-gray-100 h-[500px]">
+              <div key={i} className="content-card bg-white rounded-xl overflow-hidden shadow-md animate-pulse-soft border border-gray-100 h-[600px]">
                 <div className="p-5 h-full flex flex-col">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
@@ -204,7 +205,7 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                  <div className="h-[380px] bg-gray-100 rounded mb-4 flex-grow"></div>
+                  <div className="h-[480px] bg-gray-100 rounded mb-4 flex-grow"></div>
                   <div className="flex justify-between">
                     <div className="h-4 bg-gray-200 rounded w-16"></div>
                     <div className="h-4 bg-gray-200 rounded w-16"></div>
@@ -237,7 +238,7 @@ const Index = () => {
                 id={content.id}
                 type={content.type}
                 title={content.title}
-                excerpt={content.content.substring(0, 300) + (content.content.length > 300 ? '...' : '')}
+                excerpt={content.content.substring(0, 450) + (content.content.length > 450 ? '...' : '')}
                 authorId={content.user_id}
                 authorName={content.author_name || 'Unknown Author'}
                 authorAvatar={content.author_avatar || '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png'}
