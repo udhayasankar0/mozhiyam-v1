@@ -26,7 +26,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       {/* Sidebar for desktop */}
       <Sidebar 
         isOpen={sidebarOpen} 
-        onClose={toggleSidebar} 
         onCategoryChange={onCategoryChange}
       />
 

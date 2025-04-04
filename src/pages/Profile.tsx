@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
@@ -207,9 +208,16 @@ const Profile = () => {
                         id={post.id}
                         title={post.title}
                         type={post.type}
-                        created_at={post.created_at}
-                        user_id={post.user_id}
-                        author={userEmail}
+                        excerpt={post.content?.substring(0, 150) + '...'}
+                        authorId={post.user_id}
+                        authorName={userEmail}
+                        authorAvatar="/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png"
+                        likes={0}
+                        comments={0}
+                        date={new Date(post.created_at).toLocaleDateString()}
+                        userLiked={false}
+                        userDisliked={false}
+                        onUpdate={() => {}}
                       />
                     ))}
                   </div>
