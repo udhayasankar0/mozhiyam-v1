@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -11,15 +12,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 const Editor = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [contentType, setContentType] = useState<'poem' | 'story'>('poem');
+  const [contentType, setContentType] = useState<'poem' | 'story' | 'opinion'>('poem');
   const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!user) {
+      toast({
+        title: "உள்நுழைய வேண்டும்",
+        description: "பதிவிட உள்நுழைய வேண்டும்.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!title.trim()) {
       toast({
         title: "தலைப்பு தேவை",
@@ -40,14 +55,42 @@ const Editor = () => {
 
     setIsSaving(true);
     
-    // Simulate saving
-    setTimeout(() => {
+    try {
+      // Create a new post in Supabase
+      const { data, error } = await supabase
+        .from('posts')
+        .insert({
+          title: title,
+          content: content,
+          type: contentType,
+          user_id: user.id
+        })
+        .select('*')
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Post created successfully:', data);
+      
       setIsSaving(false);
       toast({
         title: "வெற்றிகரமாக சேமிக்கப்பட்டது!",
-        description: "உங்கள் படைப்பு சேமிக்கப்பட்டது.",
+        description: "உங்கள் படைப்பு வெளியிடப்பட்டது.",
       });
-    }, 1500);
+
+      // Navigate to the home page after successful posting
+      navigate('/');
+    } catch (error) {
+      console.error('Error creating post:', error);
+      setIsSaving(false);
+      toast({
+        title: "பிழை ஏற்பட்டது",
+        description: "உங்கள் படைப்பை சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatText = (format: 'bold' | 'italic' | 'underline') => {
@@ -82,10 +125,15 @@ const Editor = () => {
                             <Book size={16} className="text-blue-500" />
                             <span className="tamil">கவிதை</span>
                           </>
-                        ) : (
+                        ) : contentType === 'story' ? (
                           <>
                             <BookOpen size={16} className="text-emerald-500" />
                             <span className="tamil">சிறுகதை</span>
+                          </>
+                        ) : (
+                          <>
+                            <Type size={16} className="text-amber-500" />
+                            <span className="tamil">கருத்து</span>
                           </>
                         )}
                         <ChevronDown size={14} />
@@ -102,6 +150,12 @@ const Editor = () => {
                         <div className="flex items-center gap-2">
                           <BookOpen size={16} className="text-emerald-500" />
                           <span className="tamil">சிறுகதை</span>
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setContentType('opinion')}>
+                        <div className="flex items-center gap-2">
+                          <Type size={16} className="text-amber-500" />
+                          <span className="tamil">கருத்து</span>
                         </div>
                       </DropdownMenuItem>
                     </DropdownMenuContent>

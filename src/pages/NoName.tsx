@@ -1,5 +1,5 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { MessageSquare, ThumbsUp, ThumbsDown, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -46,9 +46,11 @@ const NoName = () => {
   const [newComment, setNewComment] = useState('');
   const { toast } = useToast();
   const { user } = useAuth();
+  const location = useLocation();
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
+      console.log('NoName: Fetching posts...');
       setIsLoading(true);
       
       // Get all posts ordered by creation date (newest first)
@@ -58,6 +60,8 @@ const NoName = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+
+      console.log('NoName: Posts fetched:', posts?.length || 0);
 
       if (!posts || posts.length === 0) {
         setContents([]);
@@ -152,6 +156,7 @@ const NoName = () => {
       );
 
       setContents(postsWithDetails);
+      console.log('NoName: Posts processed and ready to display:', postsWithDetails.length);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -162,11 +167,11 @@ const NoName = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, toast]);
 
   useEffect(() => {
     fetchPosts();
-  }, [user]);
+  }, [fetchPosts, location.key]); // Use location.key to detect navigation changes
 
   const toggleComments = (contentId: string) => {
     setShowComments(showComments === contentId ? null : contentId);

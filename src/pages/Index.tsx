@@ -1,6 +1,5 @@
-
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import ContentCard from '@/components/ContentCard';
 import { Star, Search } from 'lucide-react';
@@ -34,10 +33,12 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
 
-  // Fetch posts from Supabase
-  const fetchPosts = async () => {
+  // Fetch posts from Supabase - changed to useCallback for better reusability
+  const fetchPosts = useCallback(async () => {
     try {
+      console.log('Fetching posts...');
       setIsLoading(true);
       
       // Get all posts ordered by creation date (newest first)
@@ -54,6 +55,8 @@ const Index = () => {
       const { data: posts, error } = await query;
 
       if (error) throw error;
+
+      console.log('Posts fetched:', posts?.length || 0);
 
       if (!posts || posts.length === 0) {
         setContents([]);
@@ -121,6 +124,7 @@ const Index = () => {
       );
 
       setContents(postsWithDetails);
+      console.log('Posts processed and ready to display:', postsWithDetails.length);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -131,12 +135,12 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, activeCategory, toast]);
 
   // Fetch posts on load and when new post is created
   useEffect(() => {
     fetchPosts();
-  }, [user, activeCategory]);
+  }, [fetchPosts, location.key]); // Add location.key to refetch when navigating back to this page
 
   // Filter posts based on search term
   const filteredContents = searchTerm 
