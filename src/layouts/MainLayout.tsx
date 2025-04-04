@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
-import MobileNavbar from '@/components/MobileNavbar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -40,8 +39,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           {children}
         </main>
 
-        {/* Mobile navigation */}
-        <MobileNavbar />
+        {/* Mobile navigation removed as requested */}
       </div>
     </div>
   );

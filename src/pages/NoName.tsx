@@ -65,7 +65,7 @@ const NoName = () => {
         return;
       }
 
-      // For each post, get author info, likes count, dislikes count, comments count
+      // For each post, get essential information
       const postsWithDetails = await Promise.all(
         posts.map(async (post) => {
           // Get author info
@@ -293,7 +293,7 @@ const NoName = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto pb-20 md:pb-0">
+      <div className="container mx-auto pb-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-1 tamil">படைப்புகள்</h2>
           <p className="text-gray-600">Discover trending content from all authors</p>
@@ -302,7 +302,7 @@ const NoName = () => {
         {isLoading ? (
           <div className="space-y-6">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="content-card bg-white h-[75vh] w-full max-w-[640px] mx-auto animate-pulse-soft border border-gray-100 shadow-sm rounded-xl">
+              <div key={i} className="content-card bg-white h-[85vh] w-full max-w-[640px] mx-auto animate-pulse-soft border border-gray-100 shadow-sm rounded-xl">
                 <div className="p-5 h-full flex flex-col">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
@@ -335,11 +335,11 @@ const NoName = () => {
           </div>
         ) : (
           <Carousel className="w-full max-w-[640px] mx-auto" orientation="vertical">
-            <CarouselContent className="-mt-1 h-[75vh]">
+            <CarouselContent className="-mt-1 h-[85vh]">
               {contents.map((content) => (
                 <CarouselItem key={content.id} className="pt-1 md:basis-full h-full">
                   <div className="p-1 h-full">
-                    <AspectRatio ratio={4/3} className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-100 h-full">
+                    <AspectRatio ratio={4/5} className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-100 h-full">
                       <div className="h-full flex flex-col">
                         <div className="p-4 border-b flex items-center justify-between">
                           <div className="flex items-center gap-3">

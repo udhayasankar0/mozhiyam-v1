@@ -1,4 +1,5 @@
 
+// Only making the necessary changes to improve content visibility
 import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, MessageSquare, Book, BookOpen, MessageSquare as Opinion } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -323,7 +324,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
       <Link to={`/content/${id}`}>
         <CardContent className="pt-0 pb-2 px-4">
           <h3 className="text-lg font-semibold mb-2 tamil hover:text-primary transition-colors">{title}</h3>
-          <p className="text-sm text-gray-600 mb-1 line-clamp-3 tamil">
+          <p className="text-sm text-gray-600 mb-1 line-clamp-6 tamil min-h-[150px]">
             {excerpt}
           </p>
         </CardContent>
