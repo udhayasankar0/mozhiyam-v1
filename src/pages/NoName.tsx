@@ -302,7 +302,7 @@ const NoName = () => {
         {isLoading ? (
           <div className="space-y-6">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="content-card bg-white h-[85vh] w-full max-w-[640px] mx-auto animate-pulse-soft border border-gray-100 shadow-sm rounded-xl">
+              <div key={i} className="content-card bg-white h-[90vh] w-full max-w-[640px] mx-auto animate-pulse-soft border border-gray-100 shadow-sm rounded-xl">
                 <div className="p-5 h-full flex flex-col">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-10 w-10 bg-gray-200 rounded-full"></div>
@@ -335,7 +335,7 @@ const NoName = () => {
           </div>
         ) : (
           <Carousel className="w-full max-w-[640px] mx-auto" orientation="vertical">
-            <CarouselContent className="-mt-1 h-[85vh]">
+            <CarouselContent className="-mt-1 h-[90vh]">
               {contents.map((content) => (
                 <CarouselItem key={content.id} className="pt-1 md:basis-full h-full">
                   <div className="p-1 h-full">

@@ -190,7 +190,7 @@ const Index = () => {
         {isLoading ? (
           <div className="space-y-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="content-card bg-white rounded-xl overflow-hidden shadow-md animate-pulse-soft border border-gray-100 h-[400px]">
+              <div key={i} className="content-card bg-white rounded-xl overflow-hidden shadow-md animate-pulse-soft border border-gray-100 h-[500px]">
                 <div className="p-5 h-full flex flex-col">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-12 w-12 bg-gray-200 rounded-full"></div>
@@ -200,7 +200,7 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                  <div className="h-[280px] bg-gray-100 rounded mb-4 flex-grow"></div>
+                  <div className="h-[380px] bg-gray-100 rounded mb-4 flex-grow"></div>
                   <div className="flex justify-between">
                     <div className="h-4 bg-gray-200 rounded w-16"></div>
                     <div className="h-4 bg-gray-200 rounded w-16"></div>
