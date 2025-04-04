@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
@@ -10,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 
-// Content type definition
 interface Content {
   id: string;
   type: 'poem' | 'story' | 'opinion';
@@ -36,114 +34,90 @@ const Index = () => {
   const { toast } = useToast();
   const location = useLocation();
 
-  // Fetch posts from Supabase - changed to useCallback for better reusability
   const fetchPosts = useCallback(async () => {
     try {
-      console.log('Fetching posts...');
+      console.log('Fetching posts...', { 
+        activeCategory, 
+        user: user?.id || 'No user logged in' 
+      });
       setIsLoading(true);
       
-      // Get all posts ordered by creation date (newest first)
       let query = supabase
         .from('posts')
-        .select('*')
+        .select('*, profiles(username)')
         .order('created_at', { ascending: false });
       
-      // Apply category filter if not 'all'
       if (activeCategory !== 'all') {
         query = query.eq('type', activeCategory);
       }
 
       const { data: posts, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching posts:', error);
+        throw error;
+      }
 
-      console.log('Posts fetched:', posts?.length || 0);
+      console.log('Raw posts fetched:', posts?.length || 0);
 
       if (!posts || posts.length === 0) {
         setContents([]);
-        setIsLoading(false);
         return;
       }
 
-      // For each post, get only essential data to improve performance
-      const postsWithDetails = await Promise.all(
+      const processedPosts = await Promise.all(
         posts.map(async (post) => {
-          // Get author info
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('id', post.user_id)
-            .single();
-
-          // Get likes count
-          const { count: likesCount } = await supabase
-            .from('likes')
-            .select('*', { count: 'exact' })
-            .eq('post_id', post.id);
-
-          // Get comments count
-          const { count: commentsCount } = await supabase
-            .from('comments')
-            .select('*', { count: 'exact' })
-            .eq('post_id', post.id);
-
-          // Check if current user has liked or disliked
-          let userLiked = false;
-          let userDisliked = false;
-
-          if (user) {
-            const { data: likeData } = await supabase
+          try {
+            const { count: likesCount } = await supabase
               .from('likes')
-              .select('*')
-              .eq('post_id', post.id)
-              .eq('user_id', user.id);
+              .select('*', { count: 'exact' })
+              .eq('post_id', post.id);
 
-            const { data: dislikeData } = await supabase
-              .from('dislikes')
-              .select('*')
-              .eq('post_id', post.id)
-              .eq('user_id', user.id);
+            const { count: commentsCount } = await supabase
+              .from('comments')
+              .select('*', { count: 'exact' })
+              .eq('post_id', post.id);
 
-            userLiked = likeData && likeData.length > 0;
-            userDisliked = dislikeData && dislikeData.length > 0;
+            console.log(`Processing post ${post.id}:`, {
+              likesCount, 
+              commentsCount
+            });
+
+            return {
+              ...post,
+              type: post.type as 'poem' | 'story' | 'opinion',
+              author_name: post.profiles?.username || 'Unknown Author',
+              author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png',
+              likes: likesCount || 0,
+              comments: commentsCount || 0,
+            };
+          } catch (processingError) {
+            console.error(`Error processing post ${post.id}:`, processingError);
+            return null;
           }
-
-          // Cast the type to the allowed union type to fix TypeScript error
-          const postType = post.type as 'poem' | 'story' | 'opinion';
-
-          return {
-            ...post,
-            type: postType, // This ensures type is one of the allowed union types
-            author_name: profileData?.username || 'Unknown Author',
-            author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png', // Default avatar
-            likes: likesCount || 0,
-            comments: commentsCount || 0,
-            userLiked,
-            userDisliked
-          };
         })
       );
 
-      setContents(postsWithDetails);
-      console.log('Posts processed and ready to display:', postsWithDetails.length);
+      const validPosts = processedPosts.filter(post => post !== null) as Content[];
+
+      console.log('Processed posts:', validPosts.length);
+      setContents(validPosts);
     } catch (error: any) {
+      console.error('Comprehensive fetch posts error:', error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to load posts',
+        title: 'Error Fetching Posts',
+        description: error.message || 'Failed to load posts. Please try again.',
         variant: 'destructive',
       });
-      console.error('Error fetching posts:', error);
     } finally {
       setIsLoading(false);
     }
   }, [user, activeCategory, toast]);
 
-  // Fetch posts on load and when new post is created
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts, location.key]); // Add location.key to refetch when navigating back to this page
+  }, [fetchPosts, location.key]);
 
-  // Filter posts based on search term
   const filteredContents = searchTerm 
     ? contents.filter(content => 
         content.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -151,12 +125,10 @@ const Index = () => {
       )
     : contents;
 
-  // Navigate to படைப்புகள் page
   const handleNoNameClick = () => {
     navigate('/noname');
   };
 
-  // Handle category change from sidebar
   const handleCategoryChange = (categoryId: string) => {
     setActiveCategory(categoryId);
   };
@@ -179,7 +151,6 @@ const Index = () => {
             </Button>
           </div>
           
-          {/* Search input */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
