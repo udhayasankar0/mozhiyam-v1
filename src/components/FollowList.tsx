@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import FollowButton from './FollowButton';
+import { useToast } from '@/hooks/use-toast';
 
 interface FollowUserType {
   id: string;
@@ -20,59 +21,111 @@ interface FollowListProps {
 const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
   const [users, setUsers] = useState<FollowUserType[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
+        console.log(`Fetching ${type} for user ID: ${userId}`);
+        
         let query;
         
         if (type === 'followers') {
           // Get users who follow the specified user
-          query = supabase
+          const { data, error } = await supabase
             .from('followers')
             .select(`
               follower_id,
-              profiles!inner (
+              profiles:follower_id(
                 id,
                 username
               )
             `)
             .eq('following_id', userId);
+            
+          if (error) {
+            console.error(`Error fetching ${type}:`, error);
+            toast({
+              title: "Error",
+              description: `Failed to load ${type}: ${error.message}`,
+              variant: "destructive",
+            });
+            setLoading(false);
+            return;
+          }
+          
+          console.log(`Raw followers data:`, data);
+          
+          // Format the user data
+          if (data && data.length > 0) {
+            const formattedUsers: FollowUserType[] = data.map((item: any) => {
+              const profile = item.profiles;
+              return {
+                id: item.follower_id,
+                username: profile ? profile.username || 'Anonymous User' : 'Anonymous User',
+                avatar_url: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png' // Default avatar
+              };
+            });
+            
+            console.log('Formatted followers:', formattedUsers);
+            setUsers(formattedUsers);
+          } else {
+            console.log('No followers found');
+            setUsers([]);
+          }
         } else {
           // Get users who are followed by the specified user
-          query = supabase
+          const { data, error } = await supabase
             .from('followers')
             .select(`
               following_id,
-              profiles!inner (
+              profiles:following_id(
                 id,
                 username
               )
             `)
             .eq('follower_id', userId);
+            
+          if (error) {
+            console.error(`Error fetching ${type}:`, error);
+            toast({
+              title: "Error",
+              description: `Failed to load ${type}: ${error.message}`,
+              variant: "destructive",
+            });
+            setLoading(false);
+            return;
+          }
+          
+          console.log(`Raw following data:`, data);
+          
+          // Format the user data
+          if (data && data.length > 0) {
+            const formattedUsers: FollowUserType[] = data.map((item: any) => {
+              const profile = item.profiles;
+              return {
+                id: item.following_id,
+                username: profile ? profile.username || 'Anonymous User' : 'Anonymous User',
+                avatar_url: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png' // Default avatar
+              };
+            });
+            
+            console.log('Formatted following:', formattedUsers);
+            setUsers(formattedUsers);
+          } else {
+            console.log('No following found');
+            setUsers([]);
+          }
         }
-        
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error(`Error fetching ${type}:`, error);
-          return;
-        }
-        
-        // Format the user data
-        const formattedUsers: FollowUserType[] = data.map((item: any) => {
-          const profile = item.profiles;
-          return {
-            id: profile.id,
-            username: profile.username || 'Anonymous User',
-            avatar_url: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png' // Default avatar
-          };
+      } catch (error: any) {
+        console.error(`Error in fetchUsers for ${type}:`, error);
+        toast({
+          title: "Error",
+          description: `Something went wrong: ${error.message}`,
+          variant: "destructive",
         });
-        
-        setUsers(formattedUsers);
-      } catch (error) {
-        console.error(`Error fetching ${type}:`, error);
+        setUsers([]);
       } finally {
         setLoading(false);
       }
@@ -80,21 +133,33 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
     
     if (userId) {
       fetchUsers();
+    } else {
+      console.log('No userId provided to FollowList');
+      setLoading(false);
     }
-  }, [userId, type]);
+  }, [userId, type, toast]);
   
   if (loading) {
     return (
-      <div className="flex justify-center p-4">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
       </div>
     );
   }
   
   if (users.length === 0) {
     return (
-      <div className="text-center p-4 text-gray-500">
-        No {type} yet
+      <div className="text-center p-8 bg-gray-50 rounded-lg border border-gray-100">
+        <p className="text-gray-500 font-medium">
+          {type === 'followers' 
+            ? 'No followers yet' 
+            : 'You are not following anyone yet'}
+        </p>
+        <p className="text-sm text-gray-400 mt-2">
+          {type === 'followers'
+            ? 'When someone follows you, they will appear here.'
+            : 'When you follow someone, they will appear here.'}
+        </p>
       </div>
     );
   }
@@ -102,7 +167,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
   return (
     <div className="space-y-4">
       {users.map((user) => (
-        <div key={user.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50">
+        <div key={user.id} className="flex items-center justify-between p-3 rounded-md hover:bg-gray-50 border border-gray-100">
           <Link to={`/profile/${user.id}`} className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
               <AvatarImage src={user.avatar_url} alt={user.username || 'User'} />

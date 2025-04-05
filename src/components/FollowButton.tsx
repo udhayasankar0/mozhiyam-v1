@@ -36,16 +36,15 @@ const FollowButton: React.FC<FollowButtonProps> = ({
           .from('followers')
           .select('*')
           .eq('follower_id', user.id)
-          .eq('following_id', userId)
-          .single();
+          .eq('following_id', userId);
         
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           console.error('Error checking follow status:', error);
           return;
         }
         
         console.log('Follow status data:', data);
-        setIsFollowing(!!data);
+        setIsFollowing(data && data.length > 0);
       } catch (error) {
         console.error('Error checking follow status:', error);
       }
