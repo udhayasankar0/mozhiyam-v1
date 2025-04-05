@@ -31,6 +31,7 @@ interface ContentCardProps {
   userLiked: boolean;
   userDisliked: boolean;
   onUpdate: () => void;
+  truncateLines?: number; // New prop to control truncation
 }
 
 interface Comment {
@@ -55,7 +56,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
   date,
   userLiked: initialUserLiked,
   userDisliked: initialUserDisliked,
-  onUpdate
+  onUpdate,
+  truncateLines
 }) => {
   const [liked, setLiked] = useState(initialUserLiked);
   const [disliked, setDisliked] = useState(initialUserDisliked);
@@ -66,6 +68,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
   const [newComment, setNewComment] = useState('');
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [isPostingComment, setIsPostingComment] = useState(false);
+  const [showFullText, setShowFullText] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -93,6 +96,50 @@ const ContentCard: React.FC<ContentCardProps> = ({
         return 'கருத்து';
       default:
         return '';
+    }
+  };
+
+  // Function to format content based on truncation setting
+  const formatContent = () => {
+    if (!truncateLines || showFullText) {
+      // Show full content
+      return (
+        <p className="text-sm text-gray-600 mb-1 tamil">
+          {excerpt.split('\n').map((line, i) => (
+            <React.Fragment key={i}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
+        </p>
+      );
+    } else {
+      // Truncate to specified number of lines
+      const lines = excerpt.split('\n').slice(0, truncateLines);
+      const hasMoreLines = excerpt.split('\n').length > truncateLines;
+      
+      return (
+        <>
+          <p className="text-sm text-gray-600 mb-1 tamil">
+            {lines.map((line, i) => (
+              <React.Fragment key={i}>
+                {line}
+                <br />
+              </React.Fragment>
+            ))}
+            {hasMoreLines && '...'}
+          </p>
+          {hasMoreLines && (
+            <Button 
+              variant="link" 
+              onClick={() => setShowFullText(true)} 
+              className="p-0 h-auto text-sm text-primary mt-1"
+            >
+              <span className="tamil">முழுவதையும் படிக்க</span>
+            </Button>
+          )}
+        </>
+      );
     }
   };
 
@@ -321,14 +368,14 @@ const ContentCard: React.FC<ContentCardProps> = ({
         </div>
       </CardHeader>
       
-      <Link to={`/content/${id}`}>
-        <CardContent className="pt-0 pb-2 px-4">
-          <h3 className="text-lg font-semibold mb-2 tamil hover:text-primary transition-colors">{title}</h3>
-          <p className="text-sm text-gray-600 mb-1 line-clamp-6 tamil min-h-[150px]">
-            {excerpt}
-          </p>
-        </CardContent>
-      </Link>
+      <CardContent className="pt-0 pb-2 px-4">
+        <h3 className="text-lg font-semibold mb-2 tamil hover:text-primary transition-colors">
+          <Link to={`/content/${id}`}>{title}</Link>
+        </h3>
+        <div className="min-h-[50px]">
+          {formatContent()}
+        </div>
+      </CardContent>
       
       <CardFooter className="px-4 py-3 border-t flex items-center justify-between">
         <div className="flex items-center gap-3">

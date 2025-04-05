@@ -89,10 +89,34 @@ const Index = () => {
               .select('*', { count: 'exact' })
               .eq('post_id', post.id);
 
+            // Check if current user has liked or disliked the post
+            let userLiked = false;
+            let userDisliked = false;
+            
+            if (user) {
+              const { data: likeData } = await supabase
+                .from('likes')
+                .select('*')
+                .eq('post_id', post.id)
+                .eq('user_id', user.id);
+                
+              userLiked = likeData && likeData.length > 0;
+              
+              const { data: dislikeData } = await supabase
+                .from('dislikes')
+                .select('*')
+                .eq('post_id', post.id)
+                .eq('user_id', user.id);
+                
+              userDisliked = dislikeData && dislikeData.length > 0;
+            }
+
             console.log(`Processing post ${post.id}:`, {
               likesCount, 
               commentsCount,
-              authorUsername: authorData?.username || 'Unknown'
+              authorUsername: authorData?.username || 'Unknown',
+              userLiked,
+              userDisliked
             });
 
             return {
@@ -102,6 +126,8 @@ const Index = () => {
               author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png',
               likes: likesCount || 0,
               comments: commentsCount || 0,
+              userLiked,
+              userDisliked
             };
           } catch (processingError) {
             console.error(`Error processing post ${post.id}:`, processingError);
@@ -221,7 +247,7 @@ const Index = () => {
                 id={content.id}
                 type={content.type}
                 title={content.title}
-                excerpt={content.content.substring(0, 450) + (content.content.length > 450 ? '...' : '')}
+                excerpt={content.content}
                 authorId={content.user_id}
                 authorName={content.author_name || 'Unknown Author'}
                 authorAvatar={content.author_avatar || '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png'}
@@ -231,6 +257,7 @@ const Index = () => {
                 userLiked={content.userLiked || false}
                 userDisliked={content.userDisliked || false}
                 onUpdate={fetchPosts}
+                truncateLines={3} // Set truncation to 3 lines
               />
             ))}
           </div>

@@ -168,7 +168,7 @@ const NoName = () => {
                 id={content.id}
                 type={content.type}
                 title={content.title}
-                excerpt={content.content.substring(0, 450) + (content.content.length > 450 ? '...' : '')}
+                excerpt={content.content}
                 authorId={content.user_id}
                 authorName={content.author_name || 'Unknown Author'}
                 authorAvatar={content.author_avatar || '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png'}
@@ -178,6 +178,7 @@ const NoName = () => {
                 userLiked={content.userLiked || false}
                 userDisliked={content.userDisliked || false}
                 onUpdate={fetchContents}
+                // No truncateLines prop means show full content
               />
             ))}
           </div>
