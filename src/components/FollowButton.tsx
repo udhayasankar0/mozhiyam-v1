@@ -31,6 +31,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       if (!user || user.id === userId) return;
       
       try {
+        console.log(`Checking follow status: Current user (${user.id}) following user (${userId})`);
         const { data, error } = await supabase
           .from('followers')
           .select('*')
@@ -43,6 +44,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
           return;
         }
         
+        console.log('Follow status data:', data);
         setIsFollowing(!!data);
       } catch (error) {
         console.error('Error checking follow status:', error);
@@ -61,6 +63,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
           return;
         }
         
+        console.log(`Follower count for user ${userId}:`, count);
         setFollowerCount(count || 0);
       } catch (error) {
         console.error('Error getting follower count:', error);
@@ -96,6 +99,8 @@ const FollowButton: React.FC<FollowButtonProps> = ({
     setIsLoading(true);
     
     try {
+      console.log(`Attempting to ${isFollowing ? 'unfollow' : 'follow'} user ${userId}`);
+      
       if (isFollowing) {
         // Unfollow
         const { error } = await supabase
@@ -104,8 +109,12 @@ const FollowButton: React.FC<FollowButtonProps> = ({
           .eq('follower_id', user.id)
           .eq('following_id', userId);
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error unfollowing:', error);
+          throw error;
+        }
         
+        console.log('Successfully unfollowed');
         setIsFollowing(false);
         setFollowerCount(prev => Math.max(0, prev - 1));
         toast({
@@ -121,8 +130,12 @@ const FollowButton: React.FC<FollowButtonProps> = ({
             following_id: userId,
           });
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error following:', error);
+          throw error;
+        }
         
+        console.log('Successfully followed');
         setIsFollowing(true);
         setFollowerCount(prev => prev + 1);
         toast({
