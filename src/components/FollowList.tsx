@@ -21,15 +21,15 @@ interface FollowListProps {
 const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
   const [users, setUsers] = useState<FollowUserType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
+      setError(null);
       try {
         console.log(`Fetching ${type} for user ID: ${userId}`);
-        
-        let query;
         
         if (type === 'followers') {
           // Get users who follow the specified user
@@ -37,7 +37,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
             .from('followers')
             .select(`
               follower_id,
-              profiles:follower_id(
+              profiles!followers_follower_id_fkey(
                 id,
                 username
               )
@@ -46,6 +46,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
             
           if (error) {
             console.error(`Error fetching ${type}:`, error);
+            setError(error.message);
             toast({
               title: "Error",
               description: `Failed to load ${type}: ${error.message}`,
@@ -59,14 +60,16 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
           
           // Format the user data
           if (data && data.length > 0) {
-            const formattedUsers: FollowUserType[] = data.map((item: any) => {
-              const profile = item.profiles;
-              return {
-                id: item.follower_id,
-                username: profile ? profile.username || 'Anonymous User' : 'Anonymous User',
-                avatar_url: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png' // Default avatar
-              };
-            });
+            const formattedUsers: FollowUserType[] = data
+              .filter((item: any) => item.profiles) // Filter out null profiles
+              .map((item: any) => {
+                const profile = item.profiles;
+                return {
+                  id: profile.id,
+                  username: profile.username || 'Anonymous User',
+                  avatar_url: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png' // Default avatar
+                };
+              });
             
             console.log('Formatted followers:', formattedUsers);
             setUsers(formattedUsers);
@@ -80,7 +83,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
             .from('followers')
             .select(`
               following_id,
-              profiles:following_id(
+              profiles!followers_following_id_fkey(
                 id,
                 username
               )
@@ -89,6 +92,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
             
           if (error) {
             console.error(`Error fetching ${type}:`, error);
+            setError(error.message);
             toast({
               title: "Error",
               description: `Failed to load ${type}: ${error.message}`,
@@ -102,14 +106,16 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
           
           // Format the user data
           if (data && data.length > 0) {
-            const formattedUsers: FollowUserType[] = data.map((item: any) => {
-              const profile = item.profiles;
-              return {
-                id: item.following_id,
-                username: profile ? profile.username || 'Anonymous User' : 'Anonymous User',
-                avatar_url: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png' // Default avatar
-              };
-            });
+            const formattedUsers: FollowUserType[] = data
+              .filter((item: any) => item.profiles) // Filter out null profiles
+              .map((item: any) => {
+                const profile = item.profiles;
+                return {
+                  id: profile.id,
+                  username: profile.username || 'Anonymous User',
+                  avatar_url: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png' // Default avatar
+                };
+              });
             
             console.log('Formatted following:', formattedUsers);
             setUsers(formattedUsers);
@@ -120,6 +126,7 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
         }
       } catch (error: any) {
         console.error(`Error in fetchUsers for ${type}:`, error);
+        setError(error.message);
         toast({
           title: "Error",
           description: `Something went wrong: ${error.message}`,
@@ -143,6 +150,15 @@ const FollowList: React.FC<FollowListProps> = ({ userId, type }) => {
     return (
       <div className="flex justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="text-center p-8 bg-red-50 rounded-lg border border-red-100">
+        <p className="text-red-500 font-medium">Error loading data</p>
+        <p className="text-sm text-red-400 mt-2">{error}</p>
       </div>
     );
   }
