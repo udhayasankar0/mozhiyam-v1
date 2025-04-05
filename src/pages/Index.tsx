@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
@@ -42,9 +43,10 @@ const Index = () => {
       });
       setIsLoading(true);
       
+      // Step 1: Fetch posts without the profiles join that's causing the error
       let query = supabase
         .from('posts')
-        .select('*, profiles(username)')
+        .select('*')
         .order('created_at', { ascending: false });
       
       if (activeCategory !== 'all') {
@@ -62,12 +64,21 @@ const Index = () => {
 
       if (!posts || posts.length === 0) {
         setContents([]);
+        setIsLoading(false);
         return;
       }
 
+      // Step 2: Process the posts and fetch author usernames in a separate query
       const processedPosts = await Promise.all(
         posts.map(async (post) => {
           try {
+            // Fetch author username for this post
+            const { data: authorData } = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', post.user_id)
+              .single();
+
             const { count: likesCount } = await supabase
               .from('likes')
               .select('*', { count: 'exact' })
@@ -80,13 +91,14 @@ const Index = () => {
 
             console.log(`Processing post ${post.id}:`, {
               likesCount, 
-              commentsCount
+              commentsCount,
+              authorUsername: authorData?.username || 'Unknown'
             });
 
             return {
               ...post,
               type: post.type as 'poem' | 'story' | 'opinion',
-              author_name: post.profiles?.username || 'Unknown Author',
+              author_name: authorData?.username || 'Unknown Author',
               author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png',
               likes: likesCount || 0,
               comments: commentsCount || 0,
