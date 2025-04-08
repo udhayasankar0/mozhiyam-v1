@@ -1,19 +1,13 @@
 
 // Only making the necessary changes to improve content visibility
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, MessageSquare, Book, BookOpen, MessageSquare as Opinion } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, MessageSquare, Book, BookOpen, MessageSquare as Opinion, ChevronUp, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 
@@ -31,7 +25,7 @@ interface ContentCardProps {
   userLiked: boolean;
   userDisliked: boolean;
   onUpdate: () => void;
-  truncateLines?: number; // New prop to control truncation
+  truncateLines?: number;
 }
 
 interface Comment {
@@ -133,7 +127,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
             <Button 
               variant="link" 
               onClick={() => setShowFullText(true)} 
-              className="p-0 h-auto text-sm text-primary mt-1"
+              className="p-0 h-auto text-sm text-primary mt-1 hover:bg-gray-50"
             >
               <span className="tamil">முழுவதையும் படிக்க</span>
             </Button>
@@ -193,9 +187,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   };
 
-  // Fetch comments when the dialog is opened
+  // Fetch comments when the section is opened
   React.useEffect(() => {
-    fetchComments();
+    if (showComments) {
+      fetchComments();
+    }
   }, [showComments]);
 
   const handleLike = async () => {
@@ -235,6 +231,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
       
       // Notify parent to update the data
       onUpdate();
+      
+      toast({
+        title: liked ? 'Unliked' : 'Liked',
+        description: liked ? 'You have unliked this post' : 'You have liked this post',
+      });
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -260,6 +261,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
           .eq('user_id', user.id)
           .eq('post_id', id);
         setDisliked(false);
+        
+        toast({
+          title: 'Removed Dislike',
+          description: 'You have removed your dislike from this post',
+        });
       } else {
         // If liked, remove like first
         if (liked) {
@@ -277,6 +283,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
           .from('dislikes')
           .insert({ user_id: user.id, post_id: id });
         setDisliked(true);
+        
+        toast({
+          title: 'Disliked',
+          description: 'You have disliked this post',
+        });
       }
       
       // Notify parent to update the data
@@ -291,6 +302,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   };
 
+  // Post new comment
   const handleCommentSubmit = async () => {
     if (!user) {
       navigate('/auth');
@@ -339,12 +351,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   };
 
-  const handleShowComments = () => {
-    if (!showComments) {
-      setShowComments(true);
-    } else {
-      setShowComments(false);
-    }
+  const handleToggleComments = () => {
+    setShowComments(!showComments);
   };
 
   return (
@@ -396,73 +404,74 @@ const ContentCard: React.FC<ContentCardProps> = ({
           </button>
         </div>
         <button
-          className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 transition-colors"
-          onClick={handleShowComments}
-          aria-label="Show comments"
+          className={`flex items-center gap-1.5 transition-colors ${showComments ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'}`}
+          onClick={handleToggleComments}
+          aria-label={showComments ? "Hide comments" : "Show comments"}
         >
           <MessageSquare size={18} />
           <span className="text-sm font-medium">{commentsCount}</span>
+          {showComments ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
       </CardFooter>
 
-      {/* Comments Dialog */}
-      <Dialog open={showComments} onOpenChange={setShowComments}>
-        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Comments on "{title}"</DialogTitle>
-          </DialogHeader>
+      {/* Inline comments section */}
+      {showComments && (
+        <div className="border-t p-4 bg-gray-50">
+          <h4 className="font-medium mb-3">Comments</h4>
+          
+          {/* Add comment form */}
+          {user && (
+            <div className="flex flex-col gap-2 mb-4">
+              <Textarea 
+                placeholder="Add your comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="min-h-[80px] bg-white"
+                disabled={isPostingComment}
+              />
+              <Button 
+                onClick={handleCommentSubmit} 
+                disabled={!newComment.trim() || isPostingComment}
+                className="self-end"
+              >
+                {isPostingComment ? 'Posting...' : 'Post Comment'}
+              </Button>
+            </div>
+          )}
+          
+          {/* Comments list */}
           <div className="space-y-4">
-            {/* Add comment form */}
-            {user && (
-              <div className="flex flex-col gap-2">
-                <Textarea 
-                  placeholder="Add your comment..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  className="min-h-[80px]"
-                  disabled={isPostingComment}
-                />
-                <Button 
-                  onClick={handleCommentSubmit} 
-                  disabled={!newComment.trim() || isPostingComment}
-                  className="self-end"
-                >
-                  {isPostingComment ? 'Posting...' : 'Post Comment'}
-                </Button>
+            {isLoadingComments ? (
+              <div className="py-4 text-center flex items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-blue-500 mr-2" />
+                <span>Loading comments...</span>
               </div>
-            )}
-            
-            {/* Comments list */}
-            <div className="space-y-4 mt-4">
-              {isLoadingComments ? (
-                <div className="py-4 text-center">Loading comments...</div>
-              ) : commentsList.length === 0 ? (
-                <div className="py-4 text-center text-gray-500">No comments yet. Be the first to comment!</div>
-              ) : (
-                commentsList.map((comment) => (
-                  <div key={comment.id} className="border-b pb-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={comment.author_avatar} alt={comment.author_name} />
-                        <AvatarFallback>{comment.author_name?.charAt(0) || '?'}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-medium text-sm">{comment.author_name}</span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(comment.created_at).toLocaleString()}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-700">{comment.content}</p>
+            ) : commentsList.length === 0 ? (
+              <div className="py-4 text-center text-gray-500">No comments yet. Be the first to comment!</div>
+            ) : (
+              commentsList.map((comment) => (
+                <div key={comment.id} className="border-b pb-4 bg-white p-3 rounded-md shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={comment.author_avatar} alt={comment.author_name} />
+                      <AvatarFallback>{comment.author_name?.charAt(0) || '?'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-medium text-sm">{comment.author_name}</span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(comment.created_at).toLocaleString()}
+                        </span>
                       </div>
+                      <p className="text-sm text-gray-700">{comment.content}</p>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
+                </div>
+              ))
+            )}
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </Card>
   );
 };

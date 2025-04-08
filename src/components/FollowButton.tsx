@@ -170,7 +170,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
         size={size}
         onClick={toggleFollow}
         disabled={isLoading || !user}
-        className={isFollowing ? "border-green-500 text-green-600" : ""}
+        className={`transition-all duration-200 hover:scale-105 ${isFollowing ? "border-green-500 text-green-600 hover:bg-green-50" : ""}`}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
