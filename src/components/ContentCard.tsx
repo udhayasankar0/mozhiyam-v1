@@ -1,7 +1,15 @@
-
-// Only making the necessary changes to improve content visibility
 import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, MessageSquare, Book, BookOpen, MessageSquare as Opinion, ChevronUp, ChevronDown } from 'lucide-react';
+import { 
+  ThumbsUp, 
+  ThumbsDown, 
+  MessageSquare, 
+  Book, 
+  BookOpen, 
+  MessageSquare as Opinion, 
+  ChevronUp, 
+  ChevronDown,
+  Loader2 
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -93,10 +101,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   };
 
-  // Function to format content based on truncation setting
   const formatContent = () => {
     if (!truncateLines || showFullText) {
-      // Show full content
       return (
         <p className="text-sm text-gray-600 mb-1 tamil">
           {excerpt.split('\n').map((line, i) => (
@@ -108,7 +114,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
         </p>
       );
     } else {
-      // Truncate to specified number of lines
       const lines = excerpt.split('\n').slice(0, truncateLines);
       const hasMoreLines = excerpt.split('\n').length > truncateLines;
       
@@ -143,7 +148,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
     try {
       setIsLoadingComments(true);
       
-      // Fetch comments from the database
       const { data: commentsData, error } = await supabase
         .from('comments')
         .select('*')
@@ -157,7 +161,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
         return;
       }
       
-      // Get author information for each comment
       const commentsWithAuthor = await Promise.all(
         commentsData.map(async (comment) => {
           const { data: authorData } = await supabase
@@ -169,7 +172,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
           return {
             ...comment,
             author_name: authorData?.username || 'Unknown User',
-            author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png', // Default avatar
+            author_avatar: '/lovable-uploads/d8ec8cb6-fb3f-4663-bffd-f8c7748b84c9.png',
           };
         })
       );
@@ -187,7 +190,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   };
 
-  // Fetch comments when the section is opened
   React.useEffect(() => {
     if (showComments) {
       fetchComments();
@@ -202,7 +204,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
 
     try {
       if (liked) {
-        // Unlike
         await supabase
           .from('likes')
           .delete()
@@ -211,7 +212,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
         setLikesCount(likesCount - 1);
         setLiked(false);
       } else {
-        // If disliked, remove dislike first
         if (disliked) {
           await supabase
             .from('dislikes')
@@ -221,7 +221,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
           setDisliked(false);
         }
         
-        // Add like
         await supabase
           .from('likes')
           .insert({ user_id: user.id, post_id: id });
@@ -229,7 +228,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
         setLiked(true);
       }
       
-      // Notify parent to update the data
       onUpdate();
       
       toast({
@@ -254,7 +252,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
 
     try {
       if (disliked) {
-        // Remove dislike
         await supabase
           .from('dislikes')
           .delete()
@@ -267,7 +264,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
           description: 'You have removed your dislike from this post',
         });
       } else {
-        // If liked, remove like first
         if (liked) {
           await supabase
             .from('likes')
@@ -278,7 +274,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
           setLikesCount(likesCount - 1);
         }
         
-        // Add dislike
         await supabase
           .from('dislikes')
           .insert({ user_id: user.id, post_id: id });
@@ -290,7 +285,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
         });
       }
       
-      // Notify parent to update the data
       onUpdate();
     } catch (error: any) {
       toast({
@@ -302,7 +296,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   };
 
-  // Post new comment
   const handleCommentSubmit = async () => {
     if (!user) {
       navigate('/auth');
@@ -314,7 +307,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
     try {
       setIsPostingComment(true);
       
-      // Add comment to database
       const { error } = await supabase
         .from('comments')
         .insert({
@@ -325,14 +317,11 @@ const ContentCard: React.FC<ContentCardProps> = ({
         
       if (error) throw error;
       
-      // Update comment count
       setCommentsCount(count => count + 1);
       setNewComment('');
       
-      // Fetch updated comments list
       fetchComments();
       
-      // Notify parent to update data
       onUpdate();
       
       toast({
@@ -414,12 +403,10 @@ const ContentCard: React.FC<ContentCardProps> = ({
         </button>
       </CardFooter>
 
-      {/* Inline comments section */}
       {showComments && (
         <div className="border-t p-4 bg-gray-50">
           <h4 className="font-medium mb-3">Comments</h4>
           
-          {/* Add comment form */}
           {user && (
             <div className="flex flex-col gap-2 mb-4">
               <Textarea 
@@ -439,7 +426,6 @@ const ContentCard: React.FC<ContentCardProps> = ({
             </div>
           )}
           
-          {/* Comments list */}
           <div className="space-y-4">
             {isLoadingComments ? (
               <div className="py-4 text-center flex items-center justify-center">
