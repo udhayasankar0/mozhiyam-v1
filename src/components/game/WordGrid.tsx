@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface WordGridProps {
@@ -24,6 +24,7 @@ const WordGrid: React.FC<WordGridProps> = ({
   const [selectedLetters, setSelectedLetters] = useState<SelectedLetter[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const [highlightedCells, setHighlightedCells] = useState<{[key: string]: string}>({});
+  const gridRef = useRef<HTMLDivElement>(null);
 
   // Check if selected letters form a valid word
   useEffect(() => {
@@ -39,7 +40,7 @@ const WordGrid: React.FC<WordGridProps> = ({
       // Word found
       onWordFound(matchingWord);
       
-      // Add to highlighted cells
+      // Add to highlighted cells with animation
       const newHighlights = { ...highlightedCells };
       selectedLetters.forEach(({row, col}) => {
         newHighlights[`${row}-${col}`] = matchingWord;
@@ -107,16 +108,17 @@ const WordGrid: React.FC<WordGridProps> = ({
     if (key in highlightedCells) {
       // Use different colors for different words
       const wordIndex = targetWords.indexOf(highlightedCells[key]);
-      const colors = ['bg-green-100', 'bg-blue-100', 'bg-purple-100', 'bg-amber-100'];
+      const colors = ['bg-green-100 border-green-300', 'bg-blue-100 border-blue-300', 
+                      'bg-purple-100 border-purple-300', 'bg-amber-100 border-amber-300'];
       return colors[wordIndex % colors.length];
     }
     
     // If this cell is currently selected
     if (selectedLetters.some(letter => letter.row === row && letter.col === col)) {
-      return 'bg-orange-100';
+      return 'bg-orange-100 border-orange-300';
     }
     
-    return 'bg-amber-50';
+    return 'bg-amber-50 hover:bg-amber-100 border-amber-100';
   };
   
   // Handle touch events for mobile
@@ -128,9 +130,16 @@ const WordGrid: React.FC<WordGridProps> = ({
   const handleTouchMove = (e: React.TouchEvent) => {
     e.preventDefault(); // Prevent scrolling while selecting
     
-    if (!isSelecting) return;
+    if (!isSelecting || !gridRef.current) return;
     
     const touch = e.touches[0];
+    const gridRect = gridRef.current.getBoundingClientRect();
+    
+    // Calculate the touch position relative to the grid
+    const relativeX = touch.clientX - gridRect.left;
+    const relativeY = touch.clientY - gridRect.top;
+    
+    // Get the element at this position
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
     
     if (element && element.getAttribute('data-cell')) {
@@ -146,10 +155,10 @@ const WordGrid: React.FC<WordGridProps> = ({
 
   return (
     <div 
-      className="grid border border-amber-200 rounded-md overflow-hidden shadow-md"
+      ref={gridRef}
+      className="grid border border-amber-200 rounded-md overflow-hidden shadow-md select-none"
       style={{ 
         gridTemplateColumns: `repeat(${gridLetters[0].length}, 1fr)`,
-        userSelect: 'none', // Prevent text selection during dragging
         touchAction: 'none' // Prevent scrolling during touch
       }}
       onMouseUp={handleLetterMouseUp}
@@ -164,8 +173,8 @@ const WordGrid: React.FC<WordGridProps> = ({
             key={`${rowIndex}-${colIndex}`}
             data-cell={`${rowIndex}-${colIndex}`}
             className={cn(
-              "aspect-square flex items-center justify-center text-xl font-bold border border-amber-100",
-              "transition-colors duration-150",
+              "aspect-square flex items-center justify-center text-xl font-bold border",
+              "transition-all duration-200",
               getCellColor(rowIndex, colIndex),
               isSelecting && "cursor-pointer"
             )}

@@ -17,12 +17,12 @@ const Vilaiyattu = () => {
   const [score, setScore] = useState<number>(0);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   // Check if user is authenticated
   useEffect(() => {
-    if (!user) {
+    if (!isLoading && !user) {
       toast({
         title: "Login Required",
         description: "Please log in or register to access the game.",
@@ -30,7 +30,7 @@ const Vilaiyattu = () => {
       });
       navigate('/auth');
     }
-  }, [user, navigate, toast]);
+  }, [user, isLoading, navigate, toast]);
 
   // Reset found words when stage changes
   useEffect(() => {
@@ -61,11 +61,28 @@ const Vilaiyattu = () => {
   };
 
   // If user is not authenticated, show loading while redirecting
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto py-6 flex items-center justify-center min-h-[50vh]">
+          <p>Loading...</p>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // If user is not authenticated, we'll redirect in the useEffect
   if (!user) {
     return (
       <MainLayout>
         <div className="container mx-auto py-6 flex items-center justify-center min-h-[50vh]">
-          <p>Redirecting to login...</p>
+          <div className="text-center p-8 bg-amber-50 rounded-lg border border-amber-200">
+            <h2 className="text-xl font-bold mb-4">Access Restricted</h2>
+            <p className="mb-4">Please log in or register to play the விளையாட்டு game.</p>
+            <Button onClick={() => navigate('/auth')}>
+              Go to Login
+            </Button>
+          </div>
         </div>
       </MainLayout>
     );
