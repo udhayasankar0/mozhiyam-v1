@@ -1,3 +1,4 @@
+
 export interface GameStage {
   stageNumber: number;
   targetWords: string[];
@@ -10,17 +11,23 @@ const createEmptyGrid = (size: number): string[][] => {
   return Array(size).fill(null).map(() => Array(size).fill(''));
 };
 
-// Updated and verified Tamil letters for random filling
+// Clean, verified array of Tamil characters that display properly
 const tamilLetters = [
+  // Uyir (Vowels)
   'அ', 'ஆ', 'இ', 'ஈ', 'உ', 'ஊ', 'எ', 'ஏ', 'ஐ', 'ஒ', 'ஓ', 'ஔ',
+  // Mei (Consonants)
   'க', 'ங', 'ச', 'ஞ', 'ட', 'ண', 'த', 'ந', 'ப', 'ம', 'ய', 'ர', 'ல', 'வ', 'ழ', 'ள', 'ற', 'ன',
-  'கா', 'கி', 'கீ', 'கு', 'கூ', 'கெ', 'கே', 'கை', 'கொ', 'கோ', 'கௌ',
-  'சா', 'சி', 'சீ', 'சு', 'சூ', 'செ', 'சே', 'சை', 'சொ', 'சோ', 'சௌ',
-  'டா', 'டி', 'டீ', 'டு', 'டூ', 'டெ', 'டே', 'டை', 'டொ', 'டோ', 'டௌ',
-  'தா', 'தி', 'தீ', 'து', 'தூ', 'தெ', 'தே', 'தை', 'தொ', 'தோ', 'தௌ',
-  'பா', 'பி', 'பீ', 'பு', 'பூ', 'பெ', 'பே', 'பை', 'பொ', 'போ', 'பௌ',
-  'மா', 'மி', 'மீ', 'மு', 'மூ', 'மெ', 'மே', 'மை', 'மொ', 'மோ', 'மௌ',
-  'வா', 'வி', 'வீ', 'வு', 'வூ', 'வெ', 'வே', 'வை', 'வொ', 'வோ', 'வௌ'
+  // Uyirmei (Combined) - Common full-formed combinations
+  'கா', 'கி', 'கு', 'கெ', 'கே', 'கை', 'கோ', 
+  'சா', 'சி', 'சு', 'செ', 'சே', 'சை', 'சோ', 
+  'டா', 'டி', 'டு', 'டெ', 'டே', 'டை', 'டோ', 
+  'தா', 'தி', 'து', 'தெ', 'தே', 'தை', 'தோ', 
+  'நா', 'நி', 'நு', 'நெ', 'நே', 'நை', 'நோ', 
+  'பா', 'பி', 'பு', 'பெ', 'பே', 'பை', 'போ',
+  'மா', 'மி', 'மு', 'மெ', 'மே', 'மை', 'மோ',
+  'வா', 'வி', 'வு', 'வெ', 'வே', 'வை', 'வோ',
+  'றா', 'றி', 'று', 'றெ', 'றே', 'றை', 'றோ',
+  'னா', 'னி', 'னு', 'னெ', 'னே', 'னை', 'னோ'
 ];
 
 // Grid generating functions
@@ -129,8 +136,21 @@ const generateGrid = (words: string[], gridSize: number): string[][] => {
     }
   }
 
+  // Debug verification - log each cell's character to console for checking
+  console.log("Grid after word placement but before filling:");
+  grid.forEach((row, rowIndex) => {
+    console.log(`Row ${rowIndex}:`, row.join(' '));
+  });
+
   // Fill remaining cells with random letters
   fillRandomLetters(grid);
+
+  // Final verification
+  console.log("Final grid with random Tamil letters:");
+  grid.forEach((row, rowIndex) => {
+    console.log(`Row ${rowIndex}:`, row.join(' '));
+  });
+
   return grid;
 };
 

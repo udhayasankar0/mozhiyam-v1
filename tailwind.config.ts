@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -21,7 +20,7 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
-				tamil: ['Catamaran', 'sans-serif'],
+				tamil: ['Noto Sans Tamil', 'Catamaran', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

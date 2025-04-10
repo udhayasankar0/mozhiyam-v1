@@ -168,23 +168,29 @@ const WordGrid: React.FC<WordGridProps> = ({
       onTouchMove={handleTouchMove}
     >
       {gridLetters.map((row, rowIndex) => (
-        row.map((letter, colIndex) => (
-          <div
-            key={`${rowIndex}-${colIndex}`}
-            data-cell={`${rowIndex}-${colIndex}`}
-            className={cn(
-              "aspect-square flex items-center justify-center text-xl font-bold border",
-              "transition-all duration-200",
-              getCellColor(rowIndex, colIndex),
-              isSelecting && "cursor-pointer"
-            )}
-            onMouseDown={() => handleLetterMouseDown(rowIndex, colIndex, letter)}
-            onMouseEnter={() => handleLetterMouseEnter(rowIndex, colIndex, letter)}
-            onTouchStart={(e) => handleTouchStart(rowIndex, colIndex, letter, e)}
-          >
-            {letter}
-          </div>
-        ))
+        row.map((letter, colIndex) => {
+          // For debugging: log the character code points to check for partial characters
+          const codePoints = [...letter].map(char => char.codePointAt(0)?.toString(16).padStart(4, '0')).join(' ');
+          // console.log(`Cell [${rowIndex}][${colIndex}]: "${letter}" - Code points: ${codePoints}`);
+          
+          return (
+            <div
+              key={`${rowIndex}-${colIndex}`}
+              data-cell={`${rowIndex}-${colIndex}`}
+              className={cn(
+                "aspect-square flex items-center justify-center text-xl font-bold border",
+                "transition-all duration-200 font-tamil", // Added Tamil font class
+                getCellColor(rowIndex, colIndex),
+                isSelecting && "cursor-pointer"
+              )}
+              onMouseDown={() => handleLetterMouseDown(rowIndex, colIndex, letter)}
+              onMouseEnter={() => handleLetterMouseEnter(rowIndex, colIndex, letter)}
+              onTouchStart={(e) => handleTouchStart(rowIndex, colIndex, letter, e)}
+            >
+              {letter}
+            </div>
+          );
+        })
       ))}
     </div>
   );
