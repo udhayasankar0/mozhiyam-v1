@@ -1,4 +1,3 @@
-
 export interface GameStage {
   stageNumber: number;
   targetWords: string[];
@@ -11,12 +10,17 @@ const createEmptyGrid = (size: number): string[][] => {
   return Array(size).fill(null).map(() => Array(size).fill(''));
 };
 
-// Tamil letters for random filling
+// Updated and verified Tamil letters for random filling
 const tamilLetters = [
   'அ', 'ஆ', 'இ', 'ஈ', 'உ', 'ஊ', 'எ', 'ஏ', 'ஐ', 'ஒ', 'ஓ', 'ஔ',
   'க', 'ங', 'ச', 'ஞ', 'ட', 'ண', 'த', 'ந', 'ப', 'ம', 'ய', 'ர', 'ல', 'வ', 'ழ', 'ள', 'ற', 'ன',
-  'ஜ', 'ஷ', 'ஸ', 'ஹ',
-  'ி', 'ீ', 'ு', 'ூ', 'ெ', 'ே', 'ை', 'ொ', 'ோ', 'ௌ'
+  'கா', 'கி', 'கீ', 'கு', 'கூ', 'கெ', 'கே', 'கை', 'கொ', 'கோ', 'கௌ',
+  'சா', 'சி', 'சீ', 'சு', 'சூ', 'செ', 'சே', 'சை', 'சொ', 'சோ', 'சௌ',
+  'டா', 'டி', 'டீ', 'டு', 'டூ', 'டெ', 'டே', 'டை', 'டொ', 'டோ', 'டௌ',
+  'தா', 'தி', 'தீ', 'து', 'தூ', 'தெ', 'தே', 'தை', 'தொ', 'தோ', 'தௌ',
+  'பா', 'பி', 'பீ', 'பு', 'பூ', 'பெ', 'பே', 'பை', 'பொ', 'போ', 'பௌ',
+  'மா', 'மி', 'மீ', 'மு', 'மூ', 'மெ', 'மே', 'மை', 'மொ', 'மோ', 'மௌ',
+  'வா', 'வி', 'வீ', 'வு', 'வூ', 'வெ', 'வே', 'வை', 'வொ', 'வோ', 'வௌ'
 ];
 
 // Grid generating functions
@@ -93,7 +97,7 @@ const generateGrid = (words: string[], gridSize: number): string[][] => {
   for (const word of words) {
     let placed = false;
     let attempts = 0;
-    const maxAttempts = 50;
+    const maxAttempts = 100; // Increased from 50 to 100 to give more chances to place longer words
 
     while (!placed && attempts < maxAttempts) {
       // Pick random direction
@@ -130,35 +134,36 @@ const generateGrid = (words: string[], gridSize: number): string[][] => {
   return grid;
 };
 
-// Create the stage data
+// Create the stage data with corrected Tamil words
 export const stageData: GameStage[] = [
   {
     stageNumber: 1,
     targetWords: ['குமரன்', 'விக்னேஷ்', 'முருகன்', 'லலிதா'],
     gridSize: 8,
-    gridLetters: generateGrid(['கு', 'ம', 'ர', 'ன்', 'வி', 'க்', 'னே', 'ஷ்', 'மு', 'ரு', 'க', 'ன்', 'ல', 'லி', 'தா'], 8)
+    gridLetters: []
   },
   {
     stageNumber: 2,
     targetWords: ['அன்பு', 'தமிழ்', 'பாரதி', 'கல்வி'],
     gridSize: 8,
-    gridLetters: generateGrid(['அ', 'ன்', 'பு', 'த', 'மி', 'ழ்', 'பா', 'ர', 'தி', 'க', 'ல்', 'வி'], 8)
+    gridLetters: []
   },
   {
     stageNumber: 3,
     targetWords: ['சங்கம்', 'நிலவு', 'கடல்', 'மழை'],
     gridSize: 8,
-    gridLetters: generateGrid(['ச', 'ங்', 'க', 'ம்', 'நி', 'ல', 'வு', 'க', 'ட', 'ல்', 'ம', 'ழை'], 8)
+    gridLetters: []
   },
   {
     stageNumber: 4,
-    targetWords: ['தென்றல்', 'திருக்குறள்', 'தொல்காப்பியம்', 'சிலப்பதிகாரம்'],
-    gridSize: 10, // Using larger grid for longer words
-    gridLetters: generateGrid(['தெ', 'ன்', 'ற', 'ல்', 'தி', 'ரு', 'க்', 'கு', 'ற', 'ள்', 'தொ', 'ல்', 'கா', 'ப்', 'பி', 'ய', 'ம்', 'சி', 'ல', 'ப்', 'ப', 'தி', 'கா', 'ர', 'ம்'], 10)
+    targetWords: ['தென்றல்', 'காவியம்', 'வானம்', 'நிலம்'],
+    gridSize: 10, // Using larger grid but with shorter words that are easier to place
+    gridLetters: []
   }
 ];
 
-// Regenerate the grid letters at runtime to ensure they are different each time
+// Initialize gridLetters for each stage
 stageData.forEach(stage => {
+  // For each stage, generate a grid with its target words
   stage.gridLetters = generateGrid(stage.targetWords, stage.gridSize);
 });
