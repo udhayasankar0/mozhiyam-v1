@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/layouts/MainLayout';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -9,12 +10,27 @@ import WordGrid from '@/components/game/WordGrid';
 import StageSelector from '@/components/game/StageSelector';
 import TargetWordsList from '@/components/game/TargetWordsList';
 import ScoreDisplay from '@/components/game/ScoreDisplay';
+import { useAuth } from '@/context/AuthContext';
 
 const Vilaiyattu = () => {
   const [currentStage, setCurrentStage] = useState<number | null>(null);
   const [score, setScore] = useState<number>(0);
   const [foundWords, setFoundWords] = useState<string[]>([]);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in or register to access the game.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+    }
+  }, [user, navigate, toast]);
 
   // Reset found words when stage changes
   useEffect(() => {
@@ -25,7 +41,7 @@ const Vilaiyattu = () => {
     if (!foundWords.includes(word)) {
       const newFoundWords = [...foundWords, word];
       setFoundWords(newFoundWords);
-      setScore(score + 10);
+      setScore(prevScore => prevScore + 10);
       
       toast({
         title: "சரியான சொல்!",
@@ -43,6 +59,17 @@ const Vilaiyattu = () => {
       }
     }
   };
+
+  // If user is not authenticated, show loading while redirecting
+  if (!user) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto py-6 flex items-center justify-center min-h-[50vh]">
+          <p>Redirecting to login...</p>
+        </div>
+      </MainLayout>
+    );
+  }
 
   const renderGameContent = () => {
     if (currentStage === null) {

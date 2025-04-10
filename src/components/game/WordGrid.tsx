@@ -120,12 +120,14 @@ const WordGrid: React.FC<WordGridProps> = ({
   };
   
   // Handle touch events for mobile
-  const handleTouchStart = (row: number, col: number, letter: string) => {
+  const handleTouchStart = (row: number, col: number, letter: string, e: React.TouchEvent) => {
+    e.preventDefault(); // Prevent default touch behavior
     handleLetterMouseDown(row, col, letter);
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent scrolling while selecting
+    
     if (!isSelecting) return;
     
     const touch = e.touches[0];
@@ -144,7 +146,7 @@ const WordGrid: React.FC<WordGridProps> = ({
 
   return (
     <div 
-      className="grid border border-amber-200 rounded-md overflow-hidden"
+      className="grid border border-amber-200 rounded-md overflow-hidden shadow-md"
       style={{ 
         gridTemplateColumns: `repeat(${gridLetters[0].length}, 1fr)`,
         userSelect: 'none', // Prevent text selection during dragging
@@ -163,11 +165,13 @@ const WordGrid: React.FC<WordGridProps> = ({
             data-cell={`${rowIndex}-${colIndex}`}
             className={cn(
               "aspect-square flex items-center justify-center text-xl font-bold border border-amber-100",
-              getCellColor(rowIndex, colIndex)
+              "transition-colors duration-150",
+              getCellColor(rowIndex, colIndex),
+              isSelecting && "cursor-pointer"
             )}
             onMouseDown={() => handleLetterMouseDown(rowIndex, colIndex, letter)}
             onMouseEnter={() => handleLetterMouseEnter(rowIndex, colIndex, letter)}
-            onTouchStart={() => handleTouchStart(rowIndex, colIndex, letter)}
+            onTouchStart={(e) => handleTouchStart(rowIndex, colIndex, letter, e)}
           >
             {letter}
           </div>
