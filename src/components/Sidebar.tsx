@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Book, BookOpen, MessageSquare, List, PenSquare, Award, User, Home, UsersRound } from 'lucide-react';
+import { Book, BookOpen, MessageSquare, List, PenSquare, Award, User, Home, UsersRound, GamepadIcon } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -51,6 +51,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onCategoryChange }) => {
           <Link to="/spotlight" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/spotlight' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
             <Award size={18} />
             <span className="tamil">சிறந்த எழுத்தாளர்கள்</span>
+          </Link>
+          <Link to="/vilaiyattu" className={`sidebar-item w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${location.pathname === '/vilaiyattu' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
+            <GamepadIcon size={18} />
+            <span className="tamil">விளையாட்டு</span>
           </Link>
         </div>
         
