@@ -109,7 +109,7 @@ const fillRandomLetters = (grid: string[][]): void => {
         
         // Log the character and its code points for debugging
         const codePoints = [...randomLetter].map(char => char.codePointAt(0)?.toString(16).padStart(4, '0')).join(' ');
-        console.log(`Cell [${row}][${colIndex}]: "${randomLetter}" - Code points: ${codePoints}`);
+        console.log(`Cell [${row}][${col}]: "${randomLetter}" - Code points: ${codePoints}`);
       }
     }
   }
