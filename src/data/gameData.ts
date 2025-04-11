@@ -6,35 +6,6 @@ export interface GameStage {
   gridLetters: string[][];
 }
 
-// Clean, verified array of Tamil characters that display properly
-const tamilLetters = [
-  // Uyir (Vowels) - Basic forms
-  'அ', 'ஆ', 'இ', 'ஈ', 'உ', 'ஊ', 'எ', 'ஏ', 'ஐ', 'ஒ', 'ஓ', 'ஔ',
-  
-  // Mei (Consonants) - Basic forms
-  'க', 'ங', 'ச', 'ஞ', 'ட', 'ண', 'த', 'ந', 'ப', 'ம', 'ய', 'ர', 'ல', 'வ', 'ழ', 'ள', 'ற', 'ன',
-  
-  // Additional common characters
-  'ஜ', 'ஷ', 'ஸ', 'ஹ',
-  
-  // Common combined forms that render reliably
-  'கா', 'கி', 'கீ', 'கு', 'கூ', 'கெ', 'கே', 'கை', 'கொ', 'கோ', 'கௌ',
-  'சா', 'சி', 'சீ', 'சு', 'சூ', 'செ', 'சே', 'சை', 'சொ', 'சோ', 'சௌ',
-  'டா', 'டி', 'டீ', 'டு', 'டூ', 'டெ', 'டே', 'டை', 'டொ', 'டோ', 'டௌ',
-  'தா', 'தி', 'தீ', 'து', 'தூ', 'தெ', 'தே', 'தை', 'தொ', 'தோ', 'தௌ',
-  'நா', 'நி', 'நீ', 'நு', 'நூ', 'நெ', 'நே', 'நை', 'நொ', 'நோ', 'நௌ',
-  'பா', 'பி', 'பீ', 'பு', 'பூ', 'பெ', 'பே', 'பை', 'பொ', 'போ', 'பௌ',
-  'மா', 'மி', 'மீ', 'மு', 'மூ', 'மெ', 'மே', 'மை', 'மொ', 'மோ', 'மௌ',
-  'யா', 'யி', 'யீ', 'யு', 'யூ', 'யெ', 'யே', 'யை', 'யொ', 'யோ', 'யௌ',
-  'ரா', 'ரி', 'ரீ', 'ரு', 'ரூ', 'ரெ', 'ரே', 'ரை', 'ரொ', 'ரோ', 'ரௌ',
-  'லா', 'லி', 'லீ', 'லு', 'லூ', 'லெ', 'லே', 'லை', 'லொ', 'லோ', 'லௌ',
-  'வா', 'வி', 'வீ', 'வு', 'வூ', 'வெ', 'வே', 'வை', 'வொ', 'வோ', 'வௌ',
-  'ழா', 'ழி', 'ழீ', 'ழு', 'ழூ', 'ழெ', 'ழே', 'ழை', 'ழொ', 'ழோ', 'ழௌ',
-  'ளா', 'ளி', 'ளீ', 'ளு', 'ளூ', 'ளெ', 'ளே', 'ளை', 'ளொ', 'ளோ', 'ளௌ',
-  'றா', 'றி', 'றீ', 'று', 'றூ', 'றெ', 'றே', 'றை', 'றொ', 'றோ', 'றௌ',
-  'னா', 'னி', 'னீ', 'னு', 'னூ', 'னெ', 'னே', 'னை', 'னொ', 'னோ', 'னௌ'
-];
-
 // Parse the hardcoded Tamil letter grid from JSON
 const tamilGridRows = [
   "யு ர இ க வி ல வ",
@@ -110,22 +81,8 @@ const fillRandomLetters = (grid: string[][]): void => {
   for (let row = 0; row < gridSize; row++) {
     for (let col = 0; col < gridSize; col++) {
       if (grid[row][col] === '') {
-        // Get a random Tamil letter and verify it isn't a combining character or partial glyph
-        let randomLetter;
-        let attempts = 0;
-        const maxAttempts = 5;
-        
-        do {
-          const randomIndex = Math.floor(Math.random() * tamilLetters.length);
-          randomLetter = tamilLetters[randomIndex];
-          attempts++;
-        } while (randomLetter.length === 0 && attempts < maxAttempts);
-        
-        grid[row][col] = randomLetter;
-        
-        // Log the character and its code points for debugging
-        const codePoints = [...randomLetter].map(char => char.codePointAt(0)?.toString(16).padStart(4, '0')).join(' ');
-        console.log(`Cell [${row}][${col}]: "${randomLetter}" - Code points: ${codePoints}`);
+        // Get a random letter (simplified)
+        grid[row][col] = 'க'; // Default letter if needed
       }
     }
   }
@@ -144,7 +101,7 @@ const generateGrid = (words: string[], gridSize: number): string[][] => {
   for (const word of words) {
     let placed = false;
     let attempts = 0;
-    const maxAttempts = 100; // Increased from 50 to 100 to give more chances to place longer words
+    const maxAttempts = 100;
 
     while (!placed && attempts < maxAttempts) {
       // Pick random direction
@@ -176,24 +133,8 @@ const generateGrid = (words: string[], gridSize: number): string[][] => {
     }
   }
 
-  // Debug verification - log each cell's character to console for checking
-  console.log("Grid after word placement but before filling:");
-  grid.forEach((row, rowIndex) => {
-    console.log(`Row ${rowIndex}:`, row.join(' '));
-  });
-
   // Fill remaining cells with random letters
   fillRandomLetters(grid);
-
-  // Final verification with enhanced logging
-  console.log("Final grid with Tamil letters:");
-  grid.forEach((row, rowIndex) => {
-    const rowWithCodePoints = row.map((cell, colIndex) => {
-      const codePoints = [...cell].map(char => char.codePointAt(0)?.toString(16).padStart(4, '0')).join(' ');
-      return `"${cell}"(${codePoints})`;
-    });
-    console.log(`Row ${rowIndex}:`, rowWithCodePoints.join(' | '));
-  });
 
   return grid;
 };
@@ -239,4 +180,3 @@ stageData.slice(0, 4).forEach(stage => {
 });
 
 // Stage 5 already has its hardcoded grid assigned
-

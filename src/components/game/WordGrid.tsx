@@ -108,8 +108,8 @@ const WordGrid: React.FC<WordGridProps> = ({
     if (key in highlightedCells) {
       // Use different colors for different words
       const wordIndex = targetWords.indexOf(highlightedCells[key]);
-      const colors = ['bg-green-100 border-green-300', 'bg-blue-100 border-blue-300', 
-                      'bg-purple-100 border-purple-300', 'bg-amber-100 border-amber-300'];
+      const colors = ['bg-red-100 border-red-300', 'bg-blue-100 border-blue-300', 
+                     'bg-purple-100 border-purple-300', 'bg-amber-100 border-amber-300'];
       return colors[wordIndex % colors.length];
     }
     
@@ -118,7 +118,7 @@ const WordGrid: React.FC<WordGridProps> = ({
       return 'bg-orange-100 border-orange-300';
     }
     
-    return 'bg-amber-50 hover:bg-amber-100 border-amber-100';
+    return 'bg-amber-50 hover:bg-amber-100 border-amber-200';
   };
   
   // Handle touch events for mobile
@@ -156,36 +156,40 @@ const WordGrid: React.FC<WordGridProps> = ({
   return (
     <div 
       ref={gridRef}
-      className="grid border border-amber-200 rounded-md overflow-hidden shadow-md select-none"
-      style={{ 
-        gridTemplateColumns: `repeat(${gridLetters[0].length}, 1fr)`,
-        touchAction: 'none' // Prevent scrolling during touch
-      }}
+      className="select-none"
+      style={{ touchAction: 'none' }} // Prevent scrolling during touch
       onMouseUp={handleLetterMouseUp}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleLetterMouseUp}
       onMouseLeave={handleLetterMouseUp}
       onTouchMove={handleTouchMove}
     >
-      {gridLetters.map((row, rowIndex) => (
-        row.map((letter, colIndex) => (
-          <div
-            key={`${rowIndex}-${colIndex}`}
-            data-cell={`${rowIndex}-${colIndex}`}
-            className={cn(
-              "aspect-square flex items-center justify-center text-xl font-bold border",
-              "transition-all duration-200 font-tamil", // Using the Tamil font
-              getCellColor(rowIndex, colIndex),
-              isSelecting && "cursor-pointer"
-            )}
-            onMouseDown={() => handleLetterMouseDown(rowIndex, colIndex, letter)}
-            onMouseEnter={() => handleLetterMouseEnter(rowIndex, colIndex, letter)}
-            onTouchStart={(e) => handleTouchStart(rowIndex, colIndex, letter, e)}
-          >
-            {letter}
-          </div>
-        ))
-      ))}
+      <div 
+        className="grid border border-amber-200 rounded-md overflow-hidden shadow-md"
+        style={{ 
+          gridTemplateColumns: `repeat(${gridLetters[0].length}, minmax(0, 1fr))`,
+        }}
+      >
+        {gridLetters.map((row, rowIndex) => (
+          row.map((letter, colIndex) => (
+            <div
+              key={`${rowIndex}-${colIndex}`}
+              data-cell={`${rowIndex}-${colIndex}`}
+              className={cn(
+                "aspect-square flex items-center justify-center text-3xl font-bold border",
+                "transition-all duration-200 font-tamil",
+                getCellColor(rowIndex, colIndex),
+                isSelecting && "cursor-pointer"
+              )}
+              onMouseDown={() => handleLetterMouseDown(rowIndex, colIndex, letter)}
+              onMouseEnter={() => handleLetterMouseEnter(rowIndex, colIndex, letter)}
+              onTouchStart={(e) => handleTouchStart(rowIndex, colIndex, letter, e)}
+            >
+              {letter}
+            </div>
+          ))
+        ))}
+      </div>
     </div>
   );
 };
