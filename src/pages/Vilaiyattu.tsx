@@ -108,7 +108,9 @@ const Vilaiyattu = () => {
           </Button>
           <div className="text-center">
             <h2 className="text-xl font-bold mb-1">நிலை {currentStage}</h2>
-            <p className="text-sm text-muted-foreground">4 சொற்களைக் கண்டுபிடிக்கவும்</p>
+            <p className="text-sm text-muted-foreground">
+              {currentStage === 5 ? 'தமிழ் கிரிட்' : '4 சொற்களைக் கண்டுபிடிக்கவும்'}
+            </p>
           </div>
           <ScoreDisplay score={score} />
         </div>
@@ -133,7 +135,10 @@ const Vilaiyattu = () => {
                 <h3 className="font-medium">குறிப்பு</h3>
               </div>
               <p className="text-sm text-amber-800">
-                சொற்கள் கிடைமட்டமாக, செங்குத்தாக அல்லது சாய்வாக அமைந்திருக்கும். அவற்றைக் கண்டுபிடிக்க எழுத்துக்களைத் தேர்ந்தெடுக்கவும்.
+                {currentStage === 5 
+                  ? 'இந்த கிரிட் JSON வடிவில் இருந்து உருவாக்கப்பட்டது.'
+                  : 'சொற்கள் கிடைமட்டமாக, செங்குத்தாக அல்லது சாய்வாக அமைந்திருக்கும். அவற்றைக் கண்டுபிடிக்க எழுத்துக்களைத் தேர்ந்தெடுக்கவும்.'
+                }
               </p>
             </div>
           </div>

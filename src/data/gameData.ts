@@ -6,11 +6,6 @@ export interface GameStage {
   gridLetters: string[][];
 }
 
-// Helper function to create a grid with dimensions based on the grid size
-const createEmptyGrid = (size: number): string[][] => {
-  return Array(size).fill(null).map(() => Array(size).fill(''));
-};
-
 // Clean, verified array of Tamil characters that display properly
 const tamilLetters = [
   // Uyir (Vowels) - Basic forms
@@ -39,6 +34,27 @@ const tamilLetters = [
   'றா', 'றி', 'றீ', 'று', 'றூ', 'றெ', 'றே', 'றை', 'றொ', 'றோ', 'றௌ',
   'னா', 'னி', 'னீ', 'னு', 'னூ', 'னெ', 'னே', 'னை', 'னொ', 'னோ', 'னௌ'
 ];
+
+// Parse the hardcoded Tamil letter grid from JSON
+const tamilGridRows = [
+  "யு ர இ க வி ல வ",
+  "இ ற் யா ஞ் ர ல ரு",
+  "ங் ல ஞா தி யா ங் க",
+  "ர னி இ தை ங் இ ச்",
+  "இ தி மு ழு நி லா க",
+  "வ ல் ப ப் க இ ச்",
+  "ரு ம் ர க ந மா வி"
+];
+
+// Convert the text rows into a 2D array of individual letters
+const hardcodedTamilGrid: string[][] = tamilGridRows.map(row => 
+  row.split(' ').map(letter => letter.trim())
+);
+
+// Helper function to create a grid with dimensions based on the grid size
+const createEmptyGrid = (size: number): string[][] => {
+  return Array(size).fill(null).map(() => Array(size).fill(''));
+};
 
 // Grid generating functions
 const isValidPosition = (
@@ -207,11 +223,20 @@ export const stageData: GameStage[] = [
     targetWords: ['தென்றல்', 'காவியம்', 'வானம்', 'நிலம்'],
     gridSize: 10,
     gridLetters: []
+  },
+  {
+    stageNumber: 5,
+    targetWords: ['நிலா', 'வானம்', 'மழை', 'கடல்'],
+    gridSize: 7,
+    gridLetters: hardcodedTamilGrid
   }
 ];
 
-// Initialize gridLetters for each stage
-stageData.forEach(stage => {
+// Initialize gridLetters for the first 4 stages with randomly generated grids
+stageData.slice(0, 4).forEach(stage => {
   // For each stage, generate a grid with its target words
   stage.gridLetters = generateGrid(stage.targetWords, stage.gridSize);
 });
+
+// Stage 5 already has its hardcoded grid assigned
+
