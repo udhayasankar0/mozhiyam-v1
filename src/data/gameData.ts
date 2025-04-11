@@ -13,21 +13,31 @@ const createEmptyGrid = (size: number): string[][] => {
 
 // Clean, verified array of Tamil characters that display properly
 const tamilLetters = [
-  // Uyir (Vowels)
+  // Uyir (Vowels) - Basic forms
   'அ', 'ஆ', 'இ', 'ஈ', 'உ', 'ஊ', 'எ', 'ஏ', 'ஐ', 'ஒ', 'ஓ', 'ஔ',
-  // Mei (Consonants)
+  
+  // Mei (Consonants) - Basic forms
   'க', 'ங', 'ச', 'ஞ', 'ட', 'ண', 'த', 'ந', 'ப', 'ம', 'ய', 'ர', 'ல', 'வ', 'ழ', 'ள', 'ற', 'ன',
-  // Uyirmei (Combined) - Common full-formed combinations
-  'கா', 'கி', 'கு', 'கெ', 'கே', 'கை', 'கோ', 
-  'சா', 'சி', 'சு', 'செ', 'சே', 'சை', 'சோ', 
-  'டா', 'டி', 'டு', 'டெ', 'டே', 'டை', 'டோ', 
-  'தா', 'தி', 'து', 'தெ', 'தே', 'தை', 'தோ', 
-  'நா', 'நி', 'நு', 'நெ', 'நே', 'நை', 'நோ', 
-  'பா', 'பி', 'பு', 'பெ', 'பே', 'பை', 'போ',
-  'மா', 'மி', 'மு', 'மெ', 'மே', 'மை', 'மோ',
-  'வா', 'வி', 'வு', 'வெ', 'வே', 'வை', 'வோ',
-  'றா', 'றி', 'று', 'றெ', 'றே', 'றை', 'றோ',
-  'னா', 'னி', 'னு', 'னெ', 'னே', 'னை', 'னோ'
+  
+  // Additional common characters
+  'ஜ', 'ஷ', 'ஸ', 'ஹ',
+  
+  // Common combined forms that render reliably
+  'கா', 'கி', 'கீ', 'கு', 'கூ', 'கெ', 'கே', 'கை', 'கொ', 'கோ', 'கௌ',
+  'சா', 'சி', 'சீ', 'சு', 'சூ', 'செ', 'சே', 'சை', 'சொ', 'சோ', 'சௌ',
+  'டா', 'டி', 'டீ', 'டு', 'டூ', 'டெ', 'டே', 'டை', 'டொ', 'டோ', 'டௌ',
+  'தா', 'தி', 'தீ', 'து', 'தூ', 'தெ', 'தே', 'தை', 'தொ', 'தோ', 'தௌ',
+  'நா', 'நி', 'நீ', 'நு', 'நூ', 'நெ', 'நே', 'நை', 'நொ', 'நோ', 'நௌ',
+  'பா', 'பி', 'பீ', 'பு', 'பூ', 'பெ', 'பே', 'பை', 'பொ', 'போ', 'பௌ',
+  'மா', 'மி', 'மீ', 'மு', 'மூ', 'மெ', 'மே', 'மை', 'மொ', 'மோ', 'மௌ',
+  'யா', 'யி', 'யீ', 'யு', 'யூ', 'யெ', 'யே', 'யை', 'யொ', 'யோ', 'யௌ',
+  'ரா', 'ரி', 'ரீ', 'ரு', 'ரூ', 'ரெ', 'ரே', 'ரை', 'ரொ', 'ரோ', 'ரௌ',
+  'லா', 'லி', 'லீ', 'லு', 'லூ', 'லெ', 'லே', 'லை', 'லொ', 'லோ', 'லௌ',
+  'வா', 'வி', 'வீ', 'வு', 'வூ', 'வெ', 'வே', 'வை', 'வொ', 'வோ', 'வௌ',
+  'ழா', 'ழி', 'ழீ', 'ழு', 'ழூ', 'ழெ', 'ழே', 'ழை', 'ழொ', 'ழோ', 'ழௌ',
+  'ளா', 'ளி', 'ளீ', 'ளு', 'ளூ', 'ளெ', 'ளே', 'ளை', 'ளொ', 'ளோ', 'ளௌ',
+  'றா', 'றி', 'றீ', 'று', 'றூ', 'றெ', 'றே', 'றை', 'றொ', 'றோ', 'றௌ',
+  'னா', 'னி', 'னீ', 'னு', 'னூ', 'னெ', 'னே', 'னை', 'னொ', 'னோ', 'னௌ'
 ];
 
 // Grid generating functions
@@ -84,8 +94,22 @@ const fillRandomLetters = (grid: string[][]): void => {
   for (let row = 0; row < gridSize; row++) {
     for (let col = 0; col < gridSize; col++) {
       if (grid[row][col] === '') {
-        const randomIndex = Math.floor(Math.random() * tamilLetters.length);
-        grid[row][col] = tamilLetters[randomIndex];
+        // Get a random Tamil letter and verify it isn't a combining character or partial glyph
+        let randomLetter;
+        let attempts = 0;
+        const maxAttempts = 5;
+        
+        do {
+          const randomIndex = Math.floor(Math.random() * tamilLetters.length);
+          randomLetter = tamilLetters[randomIndex];
+          attempts++;
+        } while (randomLetter.length === 0 && attempts < maxAttempts);
+        
+        grid[row][col] = randomLetter;
+        
+        // Log the character and its code points for debugging
+        const codePoints = [...randomLetter].map(char => char.codePointAt(0)?.toString(16).padStart(4, '0')).join(' ');
+        console.log(`Cell [${row}][${colIndex}]: "${randomLetter}" - Code points: ${codePoints}`);
       }
     }
   }
@@ -145,10 +169,14 @@ const generateGrid = (words: string[], gridSize: number): string[][] => {
   // Fill remaining cells with random letters
   fillRandomLetters(grid);
 
-  // Final verification
-  console.log("Final grid with random Tamil letters:");
+  // Final verification with enhanced logging
+  console.log("Final grid with Tamil letters:");
   grid.forEach((row, rowIndex) => {
-    console.log(`Row ${rowIndex}:`, row.join(' '));
+    const rowWithCodePoints = row.map((cell, colIndex) => {
+      const codePoints = [...cell].map(char => char.codePointAt(0)?.toString(16).padStart(4, '0')).join(' ');
+      return `"${cell}"(${codePoints})`;
+    });
+    console.log(`Row ${rowIndex}:`, rowWithCodePoints.join(' | '));
   });
 
   return grid;
@@ -177,7 +205,7 @@ export const stageData: GameStage[] = [
   {
     stageNumber: 4,
     targetWords: ['தென்றல்', 'காவியம்', 'வானம்', 'நிலம்'],
-    gridSize: 10, // Using larger grid but with shorter words that are easier to place
+    gridSize: 10,
     gridLetters: []
   }
 ];
