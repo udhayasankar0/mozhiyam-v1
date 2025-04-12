@@ -14,7 +14,6 @@ import WritersSpotlight from "./pages/WritersSpotlight";
 import Auth from "./pages/Auth";
 import ContentDetail from "./pages/ContentDetail";
 import Followers from "./pages/Followers";
-import Vilaiyattu from "./pages/Vilaiyattu";
 
 const queryClient = new QueryClient();
 
@@ -45,7 +44,6 @@ const AppRoutes = () => {
       <Route path="/noname" element={<NoName />} />
       <Route path="/spotlight" element={<WritersSpotlight />} />
       <Route path="/followers" element={<ProtectedRoute><Followers /></ProtectedRoute>} />
-      <Route path="/vilaiyattu" element={<Vilaiyattu />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
