@@ -177,7 +177,7 @@ const Index = () => {
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold mb-1">Welcome to <span className="tamil">நூலகம்</span></h2>
+              <h2 className="text-2xl font-bold mb-1">Welcome to <span className="tamil">மொழியாம்</span></h2>
               <p className="text-gray-600">Explore content from our community</p>
             </div>
             <Button 

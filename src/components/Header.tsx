@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Menu, Search, X, User, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -45,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onRefresh }) => {
         <div className="flex items-center gap-2">
           <Link to="/">
             <h1 className="text-xl font-semibold">
-              <span className="tamil">நூலகம்</span>
+              <span className="tamil">மொழியாம்</span>
               <span className="sr-only">Tamil Library</span>
             </h1>
           </Link>
