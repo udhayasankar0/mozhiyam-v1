@@ -224,71 +224,123 @@ const Profile = () => {
               </TabsContent>
             </Tabs>
 
-            {isOwnProfile && (
-              <>
-                <Card className="bg-white shadow-md rounded-lg overflow-hidden">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold">Account Settings</CardTitle>
-                    <CardDescription>Manage your account preferences</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Accordion type="single" collapsible>
-                      <AccordionItem value="item-1">
-                        <AccordionTrigger>Personal Information</AccordionTrigger>
-                        <AccordionContent>
-                          <div>
-                            <p><strong>Email:</strong> {user?.email}</p>
-                            <p><strong>Account Created:</strong> {joinedDate}</p>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="item-2">
-                        <AccordionTrigger>Password</AccordionTrigger>
-                        <AccordionContent>
-                          <div>
-                            <Button size="sm">Reset Password</Button>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="item-3">
-                        <AccordionTrigger>Notifications</AccordionTrigger>
-                        <AccordionContent>
-                          <div>
-                            <p><strong>Email Notifications:</strong> Enabled</p>
-                            <p><strong>Push Notifications:</strong> Disabled</p>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </CardContent>
-                </Card>
+             {isOwnProfile && (
+              <div>
+                {(() => {
+                  const months = ["Jan", "Feb", "Mar", "Apr"];
+                  const daysInMonth = { "Jan": 31, "Feb": 28, "Mar": 31, "Apr": 30 };
+                  const [currentMonth, setCurrentMonth] = useState(0);
 
-                <Card className="bg-white shadow-md rounded-lg overflow-hidden">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold">Usage</CardTitle>
-                    <CardDescription>Your recent activity</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableCaption>Recent activities on your account</TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">Date</TableHead>
-                          <TableHead>Activity</TableHead>
-                          <TableHead>Details</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>-</TableCell>
-                          <TableCell>Account Creation</TableCell>
-                          <TableCell>Account created on {joinedDate}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-              </>
+                  return (
+                    <>
+                      <Card className="bg-white shadow-md rounded-lg overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-semibold">பங்களிப்பு</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between mb-2">
+                            <Button size="sm" onClick={() => setCurrentMonth((prev) => (prev === 0 ? months.length - 1 : prev - 1))}>
+                              Previous
+                            </Button>
+                            <span className="font-medium">{months[currentMonth]}</span>
+                            <Button size="sm" onClick={() => setCurrentMonth((prev) => (prev === months.length - 1 ? 0 : prev + 1))}>
+                              Next
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-7 gap-0.5">
+                            {[...Array(daysInMonth[months[currentMonth]])].map((_, index) => {
+                              const dayOfMonth = index + 1;
+                              const activityLevel = index % 5 === 0 ? 2 : index % 3 === 0 ? 1 : 0;
+                              const colorClass =
+                                activityLevel === 2 ? "bg-green-500" : activityLevel === 1 ? "bg-green-300" : "bg-gray-200";
+                              return (
+                                <div
+                                  key={index}
+                                  className={`w-6 h-6 rounded ${colorClass} border border-gray-100 flex items-center justify-center text-sm`}
+                                  title={`Day ${dayOfMonth}: ${activityLevel} contributions`}
+                                >
+                                  {dayOfMonth}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-white shadow-md rounded-lg overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-semibold">Account Settings</CardTitle>
+                          <CardDescription>Manage your account preferences</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Accordion type="single" collapsible>
+                            <AccordionItem value="item-1">
+                              <AccordionTrigger>Personal Information</AccordionTrigger>
+                              <AccordionContent>
+                                <div>
+                                  <p>
+                                    <strong>Email:</strong> {user?.email}
+                                  </p>
+                                  <p>
+                                    <strong>Account Created:</strong> {joinedDate}
+                                  </p>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-2">
+                              <AccordionTrigger>Password</AccordionTrigger>
+                              <AccordionContent>
+                                <div>
+                                  <Button size="sm">Reset Password</Button>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-3">
+                              <AccordionTrigger>Notifications</AccordionTrigger>
+                              <AccordionContent>
+                                <div>
+                                  <p>
+                                    <strong>Email Notifications:</strong> Enabled
+                                  </p>
+                                  <p>
+                                    <strong>Push Notifications:</strong> Disabled
+                                  </p>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-white shadow-md rounded-lg overflow-hidden">
+                        <CardHeader>
+                          <CardTitle className="text-lg font-semibold">Usage</CardTitle>
+                          <CardDescription>Your recent activity</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Table>
+                            <TableCaption>Recent activities on your account</TableCaption>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead className="w-[100px]">Date</TableHead>
+                                <TableHead>Activity</TableHead>
+                                <TableHead>Details</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow>
+                                <TableCell>-</TableCell>
+                                <TableCell>Account Creation</TableCell>
+                                <TableCell>Account created on {joinedDate}</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </CardContent>
+                      </Card>
+                    </>
+                  );
+                })()}
+              </div>
             )}
           </div>
         </div>
