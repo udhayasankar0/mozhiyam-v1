@@ -7,4 +7,5 @@ Key features:
 - Follow other writers and readers to stay updated on their content.
 - Explore content by categories like poems, stories, and opinions.
 - Engage with the community through comments and discussions.
+- play tamil related games and learn more
 
